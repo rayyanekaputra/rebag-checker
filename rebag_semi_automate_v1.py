@@ -1,44 +1,4 @@
-# =============================================================================
-# REBAG VALIDATION AUTOMATION - SUMMARY & CHANGELOG
-# =============================================================================
-# OVERVIEW:
-# Semi-automated Selenium script to validate "Rebag" (swap item) transactions
-# between two internal web systems: Web A (PHP Rebag Log) and Web B (SAPWeb/DevExpress).
-# Handles both Draft (filling) and Posted states, auto-detects column shifts,
-# and validates data with susut (shrinkage) handling.
-#
-# WORKFLOW:
-# 1. Opens Web A & Web B in separate tabs.
-# 2. User manually logs in/navigates to the detail page in Web A.
-# 3. Press ENTER to trigger extraction.
-# 4. Script auto-detects correct tabs, extracts data, compares fields, and prints results.
-# 5. Loop continues until user types 'quit'.
-#
-# KEY FEATURES:
-# • Dynamic tab detection by URL pattern (prevents stale handle errors)
-# • Dual extraction: Hidden JSON payload (fast) + DOM table scraping (fallback)
-# • Robust pseudo-JSON to JSON conversion (handles single quotes, None, parentheses)
-# • Auto column index detection (handles Draft vs Posted column shifts)
-# • Susut/Shrinkage handling: Skips mismatch, validates against Remarks field
-# • Continuous loop with ENTER key prompt + UX reminders
-#
-# CHANGELOG:
-# [v1.0] Initial setup: Basic tab switching, hardcoded column indices (4,5,8,9)
-# [v1.1] Fixed Web A tab detection: Replaced current_window_handle with URL pattern matching
-# [v1.2] Added manual navigation flow: Input prompt waits for user to login & open detail page
-# [v1.3] Added Draft/Posted state support: Implemented JSON fallback to DOM table scraping
-# [v1.4] Fixed JSON parsing: Added robust string replacement for DevExpress pseudo-JSON
-# [v1.5] Fixed column index mismatch: Implemented dynamic header scanning to detect # column shift
-# [v1.6] Added susut handling: Detects shrinkage items, skips them in comparison, validates amount in Remarks
-# [v1.7] UX improvements: Reminder banners, ENTER-to-continue loop, colored status output, error handling
-#
-# TECHNICAL NOTES:
-# • Web B uses DevExpress ASPxGridView. Grid data is stored in hidden inputs ending with _DXBEPVInput
-# • In Draft mode, _DXBEPVInput is often empty. Script falls back to scraping visible <td> cells
-# • Column indices shift by +1 in Draft mode due to the leading '#' column. Dynamic detection solves this.
-# • Susut items are filtered by keyword matching ('susut', 'loss', 'shrink', etc.)
-# • All window handles are re-detected every loop iteration to prevent NoSuchWindowException
-# =============================================================================
+#THIS VERSION ONLY WORKS WHEN ITS ALREADY POSTED
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -103,86 +63,83 @@ time.sleep(3)
 
 # Helper function
 def extract_grid_data(driver, grid_id, col_indices):
+    """Extract grid data from SAPWeb - works for Draft (Filling) AND Posted status"""
     items = []
     
-    # Method 1: Try hidden PVInput (Primary & Fastest)
+    # Method 1: Try hidden PVInput (Primary)
     try:
         pv_input = driver.find_element(By.ID, f"{grid_id}_DXBEPVInput")
         raw = pv_input.get_attribute("value")
         
+        # Only attempt JSON parsing if the field actually has content
         if raw:
-            # 1. Strip surrounding parentheses if present: "({...})" -> "{...}"
-            clean_raw = raw.strip()
-            if clean_raw.startswith('(') and clean_raw.endswith(')'):
-                clean_raw = clean_raw[1:-1]
-                
-            # 2. Fix pseudo-JSON to valid JSON
-            fixed = (clean_raw.replace("{'", '{"')
-                           .replace("'}", '"}')
-                           .replace("',", '",')
-                           .replace(",'", ',"')
-                           .replace(": None", ': null')
-                           .replace(", None", ', null')
-                           .replace(":None", ': null')
-                           .replace(",None", ', null'))
-                           
+            # Robust pseudo-JSON to JSON conversion
+            fixed = (raw.replace("{'", '{"')
+                       .replace("'}", '"}')
+                       .replace("',", '",')
+                       .replace(",'", ',"')
+                       .replace(": None", ': null')
+                       .replace(", None", ', null')
+                       .replace(":None", ': null')
+                       .replace(",None", ', null'))
+            
             data = json.loads(fixed)
             
             for key, row in data.items():
-                if not key.isdigit(): continue # Skip 'NIV' metadata
+                if not key.isdigit():
+                    continue
                 try:
                     kode = str(row.get(str(col_indices['code']), "") or "").strip()
                     nama = str(row.get(str(col_indices['name']), "") or "").strip()
                     uom = str(row.get(str(col_indices['uom']), "") or "").strip()
                     qty_val = row.get(str(col_indices['qty']), 0)
                     
-                    # Handle qty safely (JSON might return float, int, or string)
                     if qty_val is None:
                         qty = 0.0
                     elif isinstance(qty_val, (int, float)):
                         qty = float(qty_val)
                     else:
-                        qty = float(str(qty_val).replace(",", ""))
-                        
+                        qty_str = str(qty_val).replace(",", "").strip()
+                        qty = float(qty_str) if qty_str else 0.0
+                    
                     if kode or qty != 0:
                         items.append((kode, nama, qty, uom))
                 except Exception:
                     continue
-                    
-            if items: return items # Success, skip fallback
             
-    except Exception as e:
-        print(f"  ⚠️ PVInput parse failed: {e}")
-        
-    # Method 2: Fallback to DOM Table (For Draft/Loading states)
-    print(f"  🔍 Falling back to DOM scrape for {grid_id}...")
+            # If we found items via JSON, return them
+            if items:
+                return items
+    except Exception:
+        pass # Fall through to Method 2 if JSON fails or element is missing
+
+    # Method 2: Fallback to DOM table (Used for Draft/Filling when PVInput is empty)
     try:
         table = driver.find_element(By.ID, f"{grid_id}_DXMainTable")
-        # Match all data rows, ignore hidden/empty placeholders
-        rows = table.find_elements(By.XPATH, ".//tr[contains(@class, 'dxgvDataRow') and not(contains(@class, 'dxgvEmptyDataRow'))]")
+        # Select data rows that are not hidden
+        rows = table.find_elements(By.XPATH, ".//tr[contains(@class, 'dxgvDataRow') and not(contains(@style, 'display:none'))]")
         
         for row in rows:
             cells = row.find_elements(By.TAG_NAME, "td")
-            if len(cells) <= max(col_indices.values()): continue
-            
+            if len(cells) <= max(col_indices.values()):
+                continue
             try:
                 kode = cells[col_indices['code']].text.strip()
                 nama = cells[col_indices['name']].text.strip()
                 uom = cells[col_indices['uom']].text.strip()
                 
+                # Handle quantity text
                 qty_text = cells[col_indices['qty']].text.strip().replace(",", "")
-                qty = float(qty_text) if qty_text.replace(".", "").replace("-", "").isdigit() else 0.0
+                qty = float(qty_text) if qty_text else 0.0
                 
                 if kode or qty != 0:
                     items.append((kode, nama, qty, uom))
             except Exception:
                 continue
-    except Exception as e:
-        print(f"  ⚠️ DOM scrape failed: {e}")
-        
+    except Exception:
+        pass
+    
     return items
-
-
 #Helper function 2
 def is_susut_item(kode, nama):
     """Check if an item represents shrinkage/loss (susut)"""
@@ -323,46 +280,9 @@ while True:
         doc_number_web_b = driver.find_element(By.ID, "RefNo_I").get_attribute("value").strip() if driver.find_elements(By.ID, "RefNo_I") else "NOT FOUND"
         remarks_web_b = driver.find_element(By.ID, "Remarks_I").get_attribute("value").strip() if driver.find_elements(By.ID, "Remarks_I") else "NOT FOUND"
 
-        # -----------------------------
-        # DYNAMIC COLUMN DETECTION (Fixes Draft vs Posted shifts)
-        # -----------------------------
-        def detect_grid_cols(grid_id):
-            """
-            Detects column indices based on the presence of the '#' column.
-            Draft Mode (has #): Code=5, Name=6, UOM=9, Qty=10
-            Posted Mode (no #): Code=4, Name=5, UOM=8, Qty=9
-            """
-            try:
-                header_table = driver.find_element(By.ID, f"{grid_id}_DXHeaderTable")
-                # Get header cells
-                header_cells = header_table.find_elements(By.XPATH, ".//td[contains(@class, 'dxgvHeader')]")
-                
-                if not header_cells:
-                    # Fallback if structure is totally different
-                    return {'code': 4, 'name': 5, 'uom': 8, 'qty': 9}
-
-                # Check the first header cell text
-                first_cell_text = header_cells[0].text.strip()
-                
-                # If first column is '#', we are in Draft mode
-                if '#' in first_cell_text:
-                    return {'code': 5, 'name': 6, 'uom': 9, 'qty': 10}
-                else:
-                    # Posted mode
-                    return {'code': 4, 'name': 5, 'uom': 8, 'qty': 9}
-                    
-            except Exception as e:
-                print(f"  ⚠️ Error detecting columns for {grid_id}: {e}")
-                return {'code': 4, 'name': 5, 'uom': 8, 'qty': 9}
-        # Auto-detect indices for both grids
-        cols_baku = detect_grid_cols("gvRebagIssueDetail")
-        cols_jadi = detect_grid_cols("gvRebagReceiptDetail")
-        
-        print(f"{Fore.CYAN}📐 Detected Columns -> Baku: {cols_baku} | Jadi: {cols_jadi}{Style.RESET_ALL}")
-
-        # Extract data using dynamic indices
-        bahan_baku_web_b = extract_grid_data(driver, "gvRebagIssueDetail", cols_baku)
-        bahan_jadi_web_b = extract_grid_data(driver, "gvRebagReceiptDetail", cols_jadi)
+        COLS = {'code': 4, 'name': 5, 'uom': 8, 'qty': 9}
+        bahan_baku_web_b = extract_grid_data(driver, "gvRebagIssueDetail", COLS)
+        bahan_jadi_web_b = extract_grid_data(driver, "gvRebagReceiptDetail", COLS)
         print(f"{Fore.GREEN}✓ Extracted {len(bahan_baku_web_b)} Bahan Baku | {len(bahan_jadi_web_b)} Bahan Jadi{Style.RESET_ALL}")
 
         # -----------------------------
