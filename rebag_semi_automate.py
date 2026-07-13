@@ -9,18 +9,11 @@
 #
 # WORKFLOW:
 # 1. Opens Web A & Web B in separate tabs.
-# 2. User manually logs in/navigates to the detail page in Web A.
-# 3. Press ENTER to trigger extraction.
-# 4. Script auto-detects correct tabs, extracts data, compares fields, and prints results.
-# 5. Loop continues until user types 'quit'.
-#
-# KEY FEATURES:
-# • Dynamic tab detection by URL pattern (prevents stale handle errors)
-# • Dual extraction: Hidden JSON payload (fast) + DOM table scraping (fallback)
-# • Robust pseudo-JSON to JSON conversion (handles single quotes, None, parentheses)
-# • Auto column index detection (handles Draft vs Posted column shifts)
-# • Susut/Shrinkage handling: Skips mismatch, validates against Remarks field
-# • Continuous loop with ENTER key prompt + UX reminders
+# 2. Auto-logs into both systems using local creds.json.
+# 3. User navigates to the target detail page in Web A.
+# 4. Press ENTER to trigger extraction.
+# 5. Script auto-detects correct tabs, extracts data, compares fields, and prints results.
+# 6. Loop continues until user types 'quit'.
 #
 # CHANGELOG:
 # [v1.0] Initial setup: Basic tab switching, hardcoded column indices (4,5,8,9)
@@ -31,22 +24,19 @@
 # [v1.5] Fixed column index mismatch: Implemented dynamic header scanning to detect # column shift
 # [v1.6] Added susut handling: Detects shrinkage items, skips them in comparison, validates amount in Remarks
 # [v1.7] UX improvements: Reminder banners, ENTER-to-continue loop, colored status output, error handling
-#
-# TECHNICAL NOTES:
-# • Web B uses DevExpress ASPxGridView. Grid data is stored in hidden inputs ending with _DXBEPVInput
-# • In Draft mode, _DXBEPVInput is often empty. Script falls back to scraping visible <td> cells
-# • Column indices shift by +1 in Draft mode due to the leading '#' column. Dynamic detection solves this.
-# • Susut items are filtered by keyword matching ('susut', 'loss', 'shrink', etc.)
-# • All window handles are re-detected every loop iteration to prevent NoSuchWindowException
+# [v1.8] Fixed Item Remarks extraction mismatch: Decoupled visual column shifting from JSON payload indices
+# [v1.9] Auto-Login added: Reads creds.json to automatically authenticate Web A and Web B on startup
 # =============================================================================
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.chrome.service import Service
 import time
 import json
 import re
+import os
 
 # For colored output
 from colorama import Fore, Style, init
@@ -56,22 +46,100 @@ init(autoreset=True)
 
 # Chrome options
 options = webdriver.ChromeOptions()
-options.add_argument("--disable-component-update")  # Disable telemetry
+options.add_argument("--disable-component-update")
 options.add_argument("--disable-gpu")
-options.add_argument("--log-level=3")  # Only severe errors
+options.add_argument("--log-level=3")
+
+# Persistent Profile
+profile_path = r"D:\coding\rebag_semi_automate\selenium_profile"
+options.add_argument(f"--user-data-dir={profile_path}")
+
+# Force Offline Native Mode
+options.binary_location = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
+service = Service(executable_path=r"D:\coding\rebag_semi_automate\chromedriver.exe") 
 
 # Initialize browser
-driver = webdriver.Chrome(options=options)
+driver = webdriver.Chrome(service=service, options=options)
 
 # URLs
 web_a_url = "http://192.168.1.14:8080/rebag/index.php"
 web_b_url = "https://sapweb.indoguna.co.id/WEB_MKS/"
-# Open Web A (entry point)
-driver.get(web_a_url)  # http://192.168.1.14:8080/rebag/index.php
-print(f"\n{Fore.CYAN}👉 Web A opened. Please LOGIN and navigate to the detail page (detail_rebag.php?no_doc=...).{Style.RESET_ALL}")
-print(f"{Fore.YELLOW}⏳ Waiting for you to finish...{Style.RESET_ALL}")
 
-# Wait for manual login/navigation
+# -----------------------------
+# STEP 0: LOAD CREDENTIALS
+# -----------------------------
+creds = {"user": "", "pass": ""}
+try:
+    with open('creds.json', 'r') as f:
+        creds = json.load(f)
+        print(f"{Fore.CYAN}🔑 Credentials loaded successfully from creds.json.{Style.RESET_ALL}")
+except FileNotFoundError:
+    print(f"{Fore.YELLOW}⚠️  creds.json not found. Manual login will be required if sessions are expired.{Style.RESET_ALL}")
+except Exception as e:
+    print(f"{Fore.RED}❌ Error reading creds.json: {e}{Style.RESET_ALL}")
+# -----------------------------
+# STEP 0.1: AUTO-LOGIN WEB A
+# -----------------------------
+driver.get(web_a_url)
+print(f"\n{Fore.CYAN}🌐 Accessing Web A...{Style.RESET_ALL}")
+if creds.get("user"):
+    try:
+        # Wait up to 5s to see if the login fields exist (bypassed if cache is active)
+        user_input_a = WebDriverWait(driver, 5).until(
+            EC.element_to_be_clickable((By.NAME, "username"))
+        )
+        user_input_a.click()
+        user_input_a.clear()
+        user_input_a.send_keys(creds["user"])
+        
+        pass_input_a = driver.find_element(By.NAME, "password")
+        pass_input_a.click()
+        pass_input_a.clear()
+        pass_input_a.send_keys(creds["pass"])
+        
+        driver.find_element(By.XPATH, "//input[@type='submit' and @value='Login']").click()
+        print(f"{Fore.GREEN}✓ Auto-logged into Web A.{Style.RESET_ALL}")
+    except Exception:
+        print(f"{Fore.YELLOW}ℹ️  Web A login bypassed (cached session active or element changed).{Style.RESET_ALL}")
+
+# -----------------------------
+# STEP 0.2: AUTO-LOGIN WEB B
+# -----------------------------
+driver.execute_script("window.open('');")
+web_b_window = driver.window_handles[-1]
+driver.switch_to.window(web_b_window)
+driver.get(web_b_url)
+print(f"{Fore.CYAN}🌐 Accessing Web B...{Style.RESET_ALL}")
+if creds.get("user"):
+    try:
+        # DevExpress login forms require explicit clicks to shift cursor focus
+        user_input_b = WebDriverWait(driver, 5).until(
+            EC.element_to_be_clickable((By.ID, "UserName_I"))
+        )
+        user_input_b.click()
+        user_input_b.clear()
+        user_input_b.send_keys(creds["user"])
+        
+        time.sleep(0.5) # Brief pause for DevExpress JS events to shift focus
+        
+        pass_input_b = driver.find_element(By.ID, "Pwd_I")
+        pass_input_b.click()
+        pass_input_b.clear()
+        pass_input_b.send_keys(creds["pass"])
+        
+        driver.find_element(By.ID, "btnLogin").click()
+        print(f"{Fore.GREEN}✓ Auto-logged into Web B.{Style.RESET_ALL}")
+        time.sleep(2) # Give the dashboard a second to render after login
+    except Exception:
+        print(f"{Fore.YELLOW}ℹ️  Web B login bypassed (cached session active or element changed).{Style.RESET_ALL}")
+# -----------------------------
+# PROMPT USER FOR TARGET
+# -----------------------------
+driver.switch_to.window(driver.window_handles[0]) # Focus back on Web A
+print(f"\n{Fore.CYAN}👉 Setup Complete. Please navigate to the desired detail page in Web A (detail_rebag.php?no_doc=...).{Style.RESET_ALL}")
+print(f"{Fore.YELLOW}⏳ Waiting for you to select a document...{Style.RESET_ALL}")
+
+# Wait for manual navigation
 input("Press Enter here AFTER you're on the detail page: ")
 
 # Now detect the correct tab by URL pattern
@@ -86,37 +154,25 @@ for handle in driver.window_handles:
         break
 
 if not web_a_window:
-    # Fallback: check all tabs again and print what we see
     print(f"{Fore.RED}✗ Detail tab not found. Available tabs:{Style.RESET_ALL}")
     for h in driver.window_handles:
         driver.switch_to.window(h)
         print(f"  - {driver.current_url}")
     raise Exception("Web A detail tab not found after manual navigation")
 
-# Open Web B in new tab
-driver.execute_script("window.open('');")
-web_b_window = driver.window_handles[-1]
-driver.switch_to.window(web_b_window)
-driver.get(web_b_url)
-# Wait for SAPWeb to load (adjust if login is required)
-time.sleep(3)
-
-# Helper function
+# Helper function 1
 def extract_grid_data(driver, grid_id, col_indices):
     items = []
     
-    # Method 1: Try hidden PVInput (Primary & Fastest)
     try:
         pv_input = driver.find_element(By.ID, f"{grid_id}_DXBEPVInput")
         raw = pv_input.get_attribute("value")
         
         if raw:
-            # 1. Strip surrounding parentheses if present: "({...})" -> "{...}"
             clean_raw = raw.strip()
             if clean_raw.startswith('(') and clean_raw.endswith(')'):
                 clean_raw = clean_raw[1:-1]
                 
-            # 2. Fix pseudo-JSON to valid JSON
             fixed = (clean_raw.replace("{'", '{"')
                            .replace("'}", '"}')
                            .replace("',", '",')
@@ -129,14 +185,21 @@ def extract_grid_data(driver, grid_id, col_indices):
             data = json.loads(fixed)
             
             for key, row in data.items():
-                if not key.isdigit(): continue # Skip 'NIV' metadata
+                if not key.isdigit(): continue 
                 try:
                     kode = str(row.get(str(col_indices['code']), "") or "").strip()
                     nama = str(row.get(str(col_indices['name']), "") or "").strip()
                     uom = str(row.get(str(col_indices['uom']), "") or "").strip()
                     qty_val = row.get(str(col_indices['qty']), 0)
                     
-                    # Handle qty safely (JSON might return float, int, or string)
+                    rem_val = row.get(str(col_indices['remarks']), "")
+                    if isinstance(rem_val, (int, float)) or (isinstance(rem_val, str) and rem_val.replace(".", "").replace(",", "").replace("-", "").isdigit()):
+                        candidates = [str(v).strip() for k, v in row.items() if k.isdigit() and v and not isinstance(v, (int, float))]
+                        candidates = [c for c in candidates if c not in [kode, nama, uom] and not c.replace(".", "").replace(",", "").replace("-", "").isdigit()]
+                        rem = candidates[0] if candidates else ""
+                    else:
+                        rem = str(rem_val or "").strip()
+                    
                     if qty_val is None:
                         qty = 0.0
                     elif isinstance(qty_val, (int, float)):
@@ -145,20 +208,18 @@ def extract_grid_data(driver, grid_id, col_indices):
                         qty = float(str(qty_val).replace(",", ""))
                         
                     if kode or qty != 0:
-                        items.append((kode, nama, qty, uom))
+                        items.append((kode, nama, qty, uom, rem))
                 except Exception:
                     continue
                     
-            if items: return items # Success, skip fallback
+            if items: return items 
             
     except Exception as e:
         print(f"  ⚠️ PVInput parse failed: {e}")
         
-    # Method 2: Fallback to DOM Table (For Draft/Loading states)
     print(f"  🔍 Falling back to DOM scrape for {grid_id}...")
     try:
         table = driver.find_element(By.ID, f"{grid_id}_DXMainTable")
-        # Match all data rows, ignore hidden/empty placeholders
         rows = table.find_elements(By.XPATH, ".//tr[contains(@class, 'dxgvDataRow') and not(contains(@class, 'dxgvEmptyDataRow'))]")
         
         for row in rows:
@@ -169,12 +230,13 @@ def extract_grid_data(driver, grid_id, col_indices):
                 kode = cells[col_indices['code']].text.strip()
                 nama = cells[col_indices['name']].text.strip()
                 uom = cells[col_indices['uom']].text.strip()
+                rem = cells[col_indices['remarks']].text.strip()
                 
                 qty_text = cells[col_indices['qty']].text.strip().replace(",", "")
                 qty = float(qty_text) if qty_text.replace(".", "").replace("-", "").isdigit() else 0.0
                 
                 if kode or qty != 0:
-                    items.append((kode, nama, qty, uom))
+                    items.append((kode, nama, qty, uom, rem))
             except Exception:
                 continue
     except Exception as e:
@@ -185,7 +247,6 @@ def extract_grid_data(driver, grid_id, col_indices):
 
 #Helper function 2
 def is_susut_item(kode, nama):
-    """Check if an item represents shrinkage/loss (susut)"""
     susut_keywords = ['susut', 'loss', 'shrink', 'waste', 'reject']
     name_lower = (nama or "").lower()
     kode_lower = (kode or "").lower()
@@ -194,12 +255,7 @@ def is_susut_item(kode, nama):
 
 #Helper function 3
 def is_remarks_shrinkage_match(remarks_a, remarks_b, susut_items_a):
-    """
-    Check if Remarks mismatch is just due to susut notation.
-    Returns True if Web B remarks contains susut value that matches total susut from Web A.
-    """
     import re
-    # Extract susut value from Web B remarks (e.g., "Susut 14.77" or "susut: 14.77")
     susut_match = re.search(r'[Ss]usut[\s:]*([\d,\.]+)', remarks_b or "")
     if not susut_match:
         return False
@@ -207,18 +263,13 @@ def is_remarks_shrinkage_match(remarks_a, remarks_b, susut_items_a):
         susut_b = float(susut_match.group(1).replace(",", ""))
     except:
         return False
-    # Calculate total susut from Web A items
     total_susut_a = sum(item[2] for item in susut_items_a if is_susut_item(item[0], item[1]))
-    # Allow small floating point difference
     return abs(total_susut_a - susut_b) < 0.01
-
-# ... [keep all imports, helpers, and setup code exactly as you have] ...
 
 # Main loop - continuous processing with ENTER key
 print(f"\n{Fore.CYAN}✅ Setup complete. Press ENTER to process a rebag, or type 'quit' to exit.{Style.RESET_ALL}")
 
 while True:
-    # === REMINDER BANNER ===
     print(f"\n{Fore.CYAN}{'═' * 80}{Style.RESET_ALL}")
     print(f"{Fore.YELLOW}⚠️  REMINDER: Don't forget to open the NEW rebag form in Web A before checking!{Style.RESET_ALL}")
     print(f"{Fore.CYAN}{'═' * 80}{Style.RESET_ALL}")
@@ -237,8 +288,6 @@ while True:
 
     try:
         # === RE-DETECT WINDOWS EACH ITERATION ===
-        
-        # Find Web A tab
         web_a_window = None
         target_pattern = "detail_rebag.php?no_doc="
         for handle in driver.window_handles:
@@ -249,7 +298,6 @@ while True:
         if not web_a_window:
             raise Exception("Web A detail tab not found.")
 
-        # Find or create Web B tab
         web_b_window = None
         for handle in driver.window_handles:
             driver.switch_to.window(handle)
@@ -301,10 +349,15 @@ while True:
             except ValueError:
                 qty_in = qty_out = 0.0
             uom = cols[4].text.strip()
+            
+            rem = ""
+            if len(cols) >= 6:
+                rem = cols[5].text.strip()
+                
             if qty_out > 0:
-                bahan_baku_web_a.append((kode_item, nama_item, qty_out, uom))
+                bahan_baku_web_a.append((kode_item, nama_item, qty_out, uom, rem))
             if qty_in > 0:
-                bahan_jadi_web_a.append((kode_item, nama_item, qty_in, uom))
+                bahan_jadi_web_a.append((kode_item, nama_item, qty_in, uom, rem))
 
         # -----------------------------
         # STEP 2: Extract from Web B
@@ -324,36 +377,36 @@ while True:
         remarks_web_b = driver.find_element(By.ID, "Remarks_I").get_attribute("value").strip() if driver.find_elements(By.ID, "Remarks_I") else "NOT FOUND"
 
         # -----------------------------
-        # DYNAMIC COLUMN DETECTION (Fixes Draft vs Posted shifts)
+        # DYNAMIC COLUMN DETECTION 
         # -----------------------------
         def detect_grid_cols(grid_id):
-            """
-            Detects column indices based on the presence of the '#' column.
-            Draft Mode (has #): Code=5, Name=6, UOM=9, Qty=10
-            Posted Mode (no #): Code=4, Name=5, UOM=8, Qty=9
-            """
             try:
                 header_table = driver.find_element(By.ID, f"{grid_id}_DXHeaderTable")
-                # Get header cells
                 header_cells = header_table.find_elements(By.XPATH, ".//td[contains(@class, 'dxgvHeader')]")
-                
                 if not header_cells:
-                    # Fallback if structure is totally different
-                    return {'code': 4, 'name': 5, 'uom': 8, 'qty': 9}
-
-                # Check the first header cell text
+                    return {'code': 4, 'name': 5, 'uom': 8, 'qty': 9, 'remarks': 11}
+                
                 first_cell_text = header_cells[0].text.strip()
                 
-                # If first column is '#', we are in Draft mode
-                if '#' in first_cell_text:
-                    return {'code': 5, 'name': 6, 'uom': 9, 'qty': 10}
-                else:
-                    # Posted mode
-                    return {'code': 4, 'name': 5, 'uom': 8, 'qty': 9}
-                    
+                if "Issue" in grid_id: 
+                    if '#' in first_cell_text:
+                        # Draft Mode (+1 shift due to '#' column)
+                        return {'code': 5, 'name': 6, 'uom': 9, 'qty': 10, 'remarks': 11}
+                    else:
+                        # Posted Mode
+                        return {'code': 4, 'name': 5, 'uom': 8, 'qty': 9, 'remarks': 11}
+                else: 
+                    if '#' in first_cell_text:
+                        # Draft Mode (+1 shift due to '#' column)
+                        return {'code': 5, 'name': 6, 'uom': 9, 'qty': 10, 'remarks': 10}
+                    else:
+                        # Posted Mode
+                        return {'code': 4, 'name': 5, 'uom': 8, 'qty': 9, 'remarks': 10}
+                        
             except Exception as e:
                 print(f"  ⚠️ Error detecting columns for {grid_id}: {e}")
-                return {'code': 4, 'name': 5, 'uom': 8, 'qty': 9}
+                return {'code': 4, 'name': 5, 'uom': 8, 'qty': 9, 'remarks': 10}
+
         # Auto-detect indices for both grids
         cols_baku = detect_grid_cols("gvRebagIssueDetail")
         cols_jadi = detect_grid_cols("gvRebagReceiptDetail")
@@ -385,7 +438,7 @@ while True:
         print("=" * 80)
         print_comparison("Document Number", doc_number_web_a, doc_number_web_b)
 
-        # Remarks with shrinkage handling
+        # Main Document Remarks
         remarks_a_str = str(remarks_web_a).strip()
         remarks_b_str = str(remarks_web_b).strip()
         susut_items_a = [item for item in bahan_baku_web_a + bahan_jadi_web_a if is_susut_item(item[0], item[1])]
@@ -399,21 +452,22 @@ while True:
 
         # Bahan Baku comparison
         print(f"\n{Fore.YELLOW}📦 BAHAN BAKU (Qty Out) COMPARISON{Style.RESET_ALL}")
-        baku_b_lookup = {item[0]: item for item in bahan_baku_web_b}  # 🔑 KEY BY CODE ONLY
+        baku_b_lookup = {item[0]: item for item in bahan_baku_web_b}  
         matched_baku = 0
         total_baku = len([i for i in bahan_baku_web_a if not is_susut_item(i[0], i[1])])
 
         for i, a_item in enumerate(bahan_baku_web_a):
-            kode_a, nama_a, qty_a, uom_a = a_item
+            kode_a, nama_a, qty_a, uom_a, remark_a = a_item
             if is_susut_item(kode_a, nama_a):
                 print(f"{Fore.CYAN}Bahan Baku [{i+1}] (Susut - Expected){Style.RESET_ALL}")
                 print(f"  Kode: {kode_a} | Nama: {nama_a} | Qty: {qty_a} {uom_a}")
                 print(f"  Status: {Fore.YELLOW}ℹ️  Susut noted in Remarks{Style.RESET_ALL}\n")
                 continue
 
-            # Find by Code only → shows actual Web B values for comparison
-            b_item = baku_b_lookup.get(kode_a, ("—", "—", 0, "—"))
-            match = (kode_a == b_item[0] and nama_a == b_item[1] and abs(qty_a - b_item[2]) < 0.01 and uom_a == b_item[3])
+            b_item = baku_b_lookup.get(kode_a, ("—", "—", 0, "—", ""))
+            remark_found_in_textbox = remark_a in remarks_b_str if remark_a else True
+            
+            match = (kode_a == b_item[0] and nama_a == b_item[1] and abs(qty_a - b_item[2]) < 0.01 and uom_a == b_item[3] and remark_found_in_textbox)
             if match: matched_baku += 1
 
             status_icon = f"{Fore.GREEN}✓{Style.RESET_ALL}" if match else f"{Fore.RED}✗{Style.RESET_ALL}"
@@ -423,24 +477,31 @@ while True:
             print_comparison("  Nama", nama_a, b_item[1], value_only=True)
             print_comparison("  Qty", qty_a, b_item[2], value_only=True)
             print_comparison("  UoM", uom_a, b_item[3], value_only=True)
+            
+            if remark_a:
+                rem_status = f"{Fore.GREEN}✓ Found in Web B TextBox{Style.RESET_ALL}" if remark_found_in_textbox else f"{Fore.RED}✗ Missing from Web B TextBox{Style.RESET_ALL}"
+                print(f"  Item Remarks Target: '{remark_a}' -> {rem_status}")
+            
             print(f"  Status: {status_icon}\n")
 
         # Bahan Jadi comparison
         print(f"{Fore.YELLOW}🎁 BAHAN JADI (Qty In) COMPARISON{Style.RESET_ALL}")
-        jadi_b_lookup = {item[0]: item for item in bahan_jadi_web_b}  # 🔑 KEY BY CODE ONLY
+        jadi_b_lookup = {item[0]: item for item in bahan_jadi_web_b}  
         matched_jadi = 0
         total_jadi = len([i for i in bahan_jadi_web_a if not is_susut_item(i[0], i[1])])
 
         for i, a_item in enumerate(bahan_jadi_web_a):
-            kode_a, nama_a, qty_a, uom_a = a_item
+            kode_a, nama_a, qty_a, uom_a, remark_a = a_item
             if is_susut_item(kode_a, nama_a):
                 print(f"{Fore.CYAN}Bahan Jadi [{i+1}] (Susut - Expected){Style.RESET_ALL}")
                 print(f"  Kode: {kode_a} | Nama: {nama_a} | Qty: {qty_a} {uom_a}")
                 print(f"  Status: {Fore.YELLOW}ℹ️  Susut noted in Remarks{Style.RESET_ALL}\n")
                 continue
 
-            b_item = jadi_b_lookup.get(kode_a, ("—", "—", 0, "—"))
-            match = (kode_a == b_item[0] and nama_a == b_item[1] and abs(qty_a - b_item[2]) < 0.01 and uom_a == b_item[3])
+            b_item = jadi_b_lookup.get(kode_a, ("—", "—", 0, "—", ""))
+            remark_found_in_textbox = remark_a in remarks_b_str if remark_a else True
+            
+            match = (kode_a == b_item[0] and nama_a == b_item[1] and abs(qty_a - b_item[2]) < 0.01 and uom_a == b_item[3] and remark_found_in_textbox)
             if match: matched_jadi += 1
 
             status_icon = f"{Fore.GREEN}✓{Style.RESET_ALL}" if match else f"{Fore.RED}✗{Style.RESET_ALL}"
@@ -450,6 +511,11 @@ while True:
             print_comparison("  Nama", nama_a, b_item[1], value_only=True)
             print_comparison("  Qty", qty_a, b_item[2], value_only=True)
             print_comparison("  UoM", uom_a, b_item[3], value_only=True)
+            
+            if remark_a:
+                rem_status = f"{Fore.GREEN}✓ Found in Web B TextBox{Style.RESET_ALL}" if remark_found_in_textbox else f"{Fore.RED}✗ Missing from Web B TextBox{Style.RESET_ALL}"
+                print(f"  Item Remarks Target: '{remark_a}' -> {rem_status}")
+                
             print(f"  Status: {status_icon}\n")
 
         # Summary
@@ -468,4 +534,3 @@ while True:
 # Cleanup - browser stays open
 print(f"\n{Fore.CYAN}✅ Automation complete. Browser will remain open. Close it manually when done.{Style.RESET_ALL}")
 input("Press Enter to exit script...")
-# Do NOT call driver.quit() if you want browser to stay open
