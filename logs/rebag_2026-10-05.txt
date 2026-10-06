@@ -1,0 +1,173 @@
+#ENTRY | time=2026-10-05 14:16:48 | doc=261005766 | fp=0c6b5a046b4e | verdict=PASS | status=Posted | recheck=1 | dup=-
+================================================================================
+[14:16:48] Rebag 261005766 | Web B RefNo: 261005766 | Status: Posted | Verdict: PASS
+Remarks (A): Rebag Aus Frz Beef Heart Monbeef.
+Remarks (B): Rebag Aus Frz Beef Heart Monbeef.
+Remarks check: match
+Bahan Baku (1/1 matched):
+  - [1] AAU2MNB006 | Aus Frz Beef Heart Monbeef | 50.0 KG | OK
+Bahan Jadi (2/2 matched):
+  - [1] AAU2NON121 | Frz Beef Heart | 49.62 KG | OK
+  - [2] AAU2NON076 | Frozen 45 Cl | 0.38 KG | OK
+Problems: none
+
+#ENTRY | time=2026-10-05 14:16:57 | doc=261005766 | fp=0c6b5a046b4e | verdict=PASS | status=Posted | recheck=2 | dup=-
+================================================================================
+[14:16:57] Rebag 261005766 | Web B RefNo: 261005766 | Status: Posted | Verdict: PASS
+Remarks (A): Rebag Aus Frz Beef Heart Monbeef.
+Remarks (B): Rebag Aus Frz Beef Heart Monbeef.
+Remarks check: match
+Bahan Baku (1/1 matched):
+  - [1] AAU2MNB006 | Aus Frz Beef Heart Monbeef | 50.0 KG | OK
+Bahan Jadi (2/2 matched):
+  - [1] AAU2NON121 | Frz Beef Heart | 49.62 KG | OK
+  - [2] AAU2NON076 | Frozen 45 Cl | 0.38 KG | OK
+Problems: none
+Re-check #2 (previous: 2026-10-05 14:16:48 -> PASS)
+
+#ENTRY | time=2026-10-05 14:16:59 | doc=261005766 | fp=0c6b5a046b4e | verdict=PASS | status=Posted | recheck=3 | dup=-
+================================================================================
+[14:16:59] Rebag 261005766 | Web B RefNo: 261005766 | Status: Posted | Verdict: PASS
+Remarks (A): Rebag Aus Frz Beef Heart Monbeef.
+Remarks (B): Rebag Aus Frz Beef Heart Monbeef.
+Remarks check: match
+Bahan Baku (1/1 matched):
+  - [1] AAU2MNB006 | Aus Frz Beef Heart Monbeef | 50.0 KG | OK
+Bahan Jadi (2/2 matched):
+  - [1] AAU2NON121 | Frz Beef Heart | 49.62 KG | OK
+  - [2] AAU2NON076 | Frozen 45 Cl | 0.38 KG | OK
+Problems: none
+Re-check #3 (previous: 2026-10-05 14:16:57 -> PASS)
+
+#ENTRY | time=2026-10-05 15:05:40 | doc=261005301 | fp=8f2b580f7a2a | verdict=PASS | status=Draft | recheck=1 | dup=-
+================================================================================
+[15:05:40] Rebag 261005301 | Web B RefNo: 261005301 | Status: Draft | Verdict: PASS
+Remarks (A): Rebag EB Seafood Bean Curd Roll 6x1kg. Untuk Shabu hachi.
+Remarks (B): Rebag EB Seafood Bean Curd Roll 6x1kg. Untuk Shabu hachi.
+Remarks check: match
+Bahan Baku (1/1 matched):
+  - [1] DMY2EBF002 | EB Seafood Bean Curd Roll 6x1kg | 41.0 PCK | OK
+Bahan Jadi (1/1 matched):
+  - [1] DMY2EBF012 | Shabu Hachi EB Seafood Bean Curd Roll 6x1kg | 41.0 PCK | OK
+Problems: none
+
+#ENTRY | time=2026-10-05 15:11:37 | doc=261005301 | fp=8f2b580f7a2a | verdict=PASS | status=Draft | recheck=2 | dup=-
+================================================================================
+[15:11:37] Rebag 261005301 | Web B RefNo: 261005301 | Status: Draft | Verdict: PASS
+Remarks (A): Rebag EB Seafood Bean Curd Roll 6x1kg. Untuk Shabu hachi.
+Remarks (B): Rebag EB Seafood Bean Curd Roll 6x1kg. Untuk Shabu hachi.
+Remarks check: match
+Bahan Baku (1/1 matched):
+  - [1] DMY2EBF002 | EB Seafood Bean Curd Roll 6x1kg | 41.0 PCK | OK
+Bahan Jadi (1/1 matched):
+  - [1] DMY2EBF012 | Shabu Hachi EB Seafood Bean Curd Roll 6x1kg | 41.0 PCK | OK
+Problems: none
+Re-check #2 (previous: 2026-10-05 15:05:40 -> PASS)
+
+#ENTRY | time=2026-10-05 15:11:50 | doc=261005301 | fp=8f2b580f7a2a | verdict=PASS | status=Posted | recheck=3 | dup=-
+================================================================================
+[15:11:50] Rebag 261005301 | Web B RefNo: 261005301 | Status: Posted | Verdict: PASS
+Remarks (A): Rebag EB Seafood Bean Curd Roll 6x1kg. Untuk Shabu hachi.
+Remarks (B): Rebag EB Seafood Bean Curd Roll 6x1kg. Untuk Shabu hachi.
+Remarks check: match
+Bahan Baku (1/1 matched):
+  - [1] DMY2EBF002 | EB Seafood Bean Curd Roll 6x1kg | 41.0 PCK | OK
+Bahan Jadi (1/1 matched):
+  - [1] DMY2EBF012 | Shabu Hachi EB Seafood Bean Curd Roll 6x1kg | 41.0 PCK | OK
+Problems: none
+Re-check #3 (previous: 2026-10-05 15:11:37 -> PASS)
+
+#ENTRY | time=2026-10-05 15:12:02 | doc=261005301 | fp=8f2b580f7a2a | verdict=PASS | status=Posted | recheck=4 | dup=-
+================================================================================
+[15:12:02] Rebag 261005301 | Web B RefNo: 261005301 | Status: Posted | Verdict: PASS
+Remarks (A): Rebag EB Seafood Bean Curd Roll 6x1kg. Untuk Shabu hachi.
+Remarks (B): Rebag EB Seafood Bean Curd Roll 6x1kg. Untuk Shabu hachi.
+Remarks check: match
+Bahan Baku (1/1 matched):
+  - [1] DMY2EBF002 | EB Seafood Bean Curd Roll 6x1kg | 41.0 PCK | OK
+Bahan Jadi (1/1 matched):
+  - [1] DMY2EBF012 | Shabu Hachi EB Seafood Bean Curd Roll 6x1kg | 41.0 PCK | OK
+Problems: none
+Re-check #4 (previous: 2026-10-05 15:11:50 -> PASS)
+
+#ENTRY | time=2026-10-05 15:13:01 | doc=261005200 | fp=b9ca7db0fd5b | verdict=PASS | status=Draft | recheck=1 | dup=-
+================================================================================
+[15:13:01] Rebag 261005200 | Web B RefNo: 261005200 | Status: Draft | Verdict: PASS
+Remarks (A): Rebag 123 Frozen Buffalo Rib Meat & Frz Bonggol Slice & Aus Frozen Fat Trimming. Susut 0.26.
+Remarks (B): Rebag 123 Frozen Buffalo Rib Meat & Frz Bonggol Slice & Aus Frozen Fat Trimming. Susut 0.26.
+Remarks check: match
+Bahan Baku (3/3 matched):
+  - [1] AID2ALH002 | 123 Frozen Buffalo Rib Meat | 280.0 KG | OK
+  - [2] AAU2NON158 | Frz Bonggol Slice | 90.46 KG | OK
+  - [3] AAU2NON035 | Aus Frozen Fat Trimming | 28.8 KG | OK
+Bahan Jadi (1/1 matched):
+  - [1] AAU2NON045 | Frozen 85 Cl A | 399.0 KG | OK
+  - [2] AAU2NON00001 | item Susut | 0.26 KG | SUSUT (skipped)
+Problems: none
+
+#ENTRY | time=2026-10-05 15:13:02 | doc=261005200 | fp=b9ca7db0fd5b | verdict=PASS | status=Draft | recheck=2 | dup=-
+================================================================================
+[15:13:02] Rebag 261005200 | Web B RefNo: 261005200 | Status: Draft | Verdict: PASS
+Remarks (A): Rebag 123 Frozen Buffalo Rib Meat & Frz Bonggol Slice & Aus Frozen Fat Trimming. Susut 0.26.
+Remarks (B): Rebag 123 Frozen Buffalo Rib Meat & Frz Bonggol Slice & Aus Frozen Fat Trimming. Susut 0.26.
+Remarks check: match
+Bahan Baku (3/3 matched):
+  - [1] AID2ALH002 | 123 Frozen Buffalo Rib Meat | 280.0 KG | OK
+  - [2] AAU2NON158 | Frz Bonggol Slice | 90.46 KG | OK
+  - [3] AAU2NON035 | Aus Frozen Fat Trimming | 28.8 KG | OK
+Bahan Jadi (1/1 matched):
+  - [1] AAU2NON045 | Frozen 85 Cl A | 399.0 KG | OK
+  - [2] AAU2NON00001 | item Susut | 0.26 KG | SUSUT (skipped)
+Problems: none
+Re-check #2 (previous: 2026-10-05 15:13:01 -> PASS)
+
+#ENTRY | time=2026-10-05 15:15:18 | doc=261005361 | fp=26d843887957 | verdict=PASS | status=Draft | recheck=1 | dup=-
+================================================================================
+[15:15:18] Rebag 261005361 | Web B RefNo: 261005361 | Status: Draft | Verdict: PASS
+Remarks (A): Rebag Aus Frz Beef A Brisket NE Wingham & Aus Frz Beef Fat Trimming (Woodward). Susut 0.27.
+Remarks (B): Rebag Aus Frz Beef A Brisket NE Wingham & Aus Frz Beef Fat Trimming (Woodward). Susut 0.27.
+Remarks check: match
+Bahan Baku (2/2 matched):
+  - [1] AAU2WIN012 | Aus Frz Beef A Brisket NE Wingham | 411.47 KG | OK
+  - [2] AAU2WFA009 | Aus Frz Beef Fat Trimming (Woodward) | 176.0 KG | OK
+Bahan Jadi (3/3 matched):
+  - [1] AUS2SWF042 | US Frz Short Plate Yakiniku B | 520.5 KG | OK
+  - [2] AAU2NON035 | Aus Frozen Fat Trimming | 41.7 KG | OK
+  - [3] AAU2NON158 | Frz Bonggol Slice | 25.0 KG | OK
+  - [4] AAU2NON00001 | item Susut | 0.27 KG | SUSUT (skipped)
+Problems: none
+
+#ENTRY | time=2026-10-05 15:27:39 | doc=261005361 | fp=26d843887957 | verdict=PASS | status=Draft | recheck=2 | dup=-
+================================================================================
+[15:27:39] Rebag 261005361 | Web B RefNo: 261005361 | Status: Draft | Verdict: PASS
+Remarks (A): Rebag Aus Frz Beef A Brisket NE Wingham & Aus Frz Beef Fat Trimming (Woodward). Susut 0.27.
+Remarks (B): Rebag Aus Frz Beef A Brisket NE Wingham & Aus Frz Beef Fat Trimming (Woodward). Susut 0.27.
+Remarks check: match
+Bahan Baku (2/2 matched):
+  - [1] AAU2WIN012 | Aus Frz Beef A Brisket NE Wingham | 411.47 KG | OK
+  - [2] AAU2WFA009 | Aus Frz Beef Fat Trimming (Woodward) | 176.0 KG | OK
+Bahan Jadi (3/3 matched):
+  - [1] AUS2SWF042 | US Frz Short Plate Yakiniku B | 520.5 KG | OK
+  - [2] AAU2NON035 | Aus Frozen Fat Trimming | 41.7 KG | OK
+  - [3] AAU2NON158 | Frz Bonggol Slice | 25.0 KG | OK
+  - [4] AAU2NON00001 | item Susut | 0.27 KG | SUSUT (skipped)
+Problems: none
+Re-check #2 (previous: 2026-10-05 15:15:18 -> PASS)
+
+#ENTRY | time=2026-10-05 15:27:52 | doc=261005361 | fp=26d843887957 | verdict=PASS | status=Posted | recheck=3 | dup=-
+================================================================================
+[15:27:52] Rebag 261005361 | Web B RefNo: 261005361 | Status: Posted | Verdict: PASS
+Remarks (A): Rebag Aus Frz Beef A Brisket NE Wingham & Aus Frz Beef Fat Trimming (Woodward). Susut 0.27.
+Remarks (B): Rebag Aus Frz Beef A Brisket NE Wingham & Aus Frz Beef Fat Trimming (Woodward). Susut 0.27.
+Remarks check: match
+Bahan Baku (2/2 matched):
+  - [1] AAU2WIN012 | Aus Frz Beef A Brisket NE Wingham | 411.47 KG | OK
+  - [2] AAU2WFA009 | Aus Frz Beef Fat Trimming (Woodward) | 176.0 KG | OK
+Bahan Jadi (3/3 matched):
+  - [1] AUS2SWF042 | US Frz Short Plate Yakiniku B | 520.5 KG | OK
+  - [2] AAU2NON035 | Aus Frozen Fat Trimming | 41.7 KG | OK
+  - [3] AAU2NON158 | Frz Bonggol Slice | 25.0 KG | OK
+  - [4] AAU2NON00001 | item Susut | 0.27 KG | SUSUT (skipped)
+Problems: none
+Re-check #3 (previous: 2026-10-05 15:27:39 -> PASS)
+

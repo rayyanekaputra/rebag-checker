@@ -1,0 +1,399 @@
+#ENTRY | time=2026-10-06 10:12:24 | doc=261006310 | fp=8ee7a5bd19f1 | verdict=PASS | status=Draft | recheck=1 | dup=-
+================================================================================
+[10:12:24] Rebag 261006310 | Web B RefNo: 261006310 | Status: Draft | Verdict: PASS
+Remarks (A): Rebag Aus Frz Beef Lungs (Amh).
+Remarks (B): Rebag Aus Frz Beef Lungs (Amh).
+Remarks check: match
+Bahan Baku (1/1 matched):
+  - [1] AAU2AMH023 | Aus Frz Beef Lungs (Amh) | 98.1 KG | OK
+Bahan Jadi (2/2 matched):
+  - [1] AAU2NON124 | Frz Beef Lungs | 97.34 KG | OK
+  - [2] AAU2NON076 | Frozen 45 Cl | 0.76 KG | OK
+Problems: none
+
+#ENTRY | time=2026-10-06 10:12:37 | doc=261006310 | fp=8ee7a5bd19f1 | verdict=PASS | status=Posted | recheck=2 | dup=-
+================================================================================
+[10:12:37] Rebag 261006310 | Web B RefNo: 261006310 | Status: Posted | Verdict: PASS
+Remarks (A): Rebag Aus Frz Beef Lungs (Amh).
+Remarks (B): Rebag Aus Frz Beef Lungs (Amh).
+Remarks check: match
+Bahan Baku (1/1 matched):
+  - [1] AAU2AMH023 | Aus Frz Beef Lungs (Amh) | 98.1 KG | OK
+Bahan Jadi (2/2 matched):
+  - [1] AAU2NON124 | Frz Beef Lungs | 97.34 KG | OK
+  - [2] AAU2NON076 | Frozen 45 Cl | 0.76 KG | OK
+Problems: none
+Re-check #2 (previous: 2026-10-06 10:12:24 -> PASS)
+
+#ENTRY | time=2026-10-06 10:13:18 | doc=261006853 | fp=27582dd74c71 | verdict=PASS | status=Draft | recheck=1 | dup=-
+================================================================================
+[10:13:18] Rebag 261006853 | Web B RefNo: 261006853 | Status: Draft | Verdict: PASS
+Remarks (A): Rebag Frz Chicken Breast B/Less Local. Susut 0.29.
+Remarks (B): Rebag Frz Chicken Breast B/Less Local. Susut 0.29.
+Remarks check: match
+Bahan Baku (1/1 matched):
+  - [1] CID2NON006 | Frz Chicken Breast B/Less Local | 27.29 KG | OK
+Bahan Jadi (1/1 matched):
+  - [1] ZCIDNON009 | FRZ Chicken Steak | 27.0 KG | OK
+  - [2] AAU2NON00001 | item Susut | 0.29 KG | SUSUT (skipped)
+Problems: none
+
+#ENTRY | time=2026-10-06 10:13:22 | doc=261006853 | fp=27582dd74c71 | verdict=PASS | status=Draft | recheck=2 | dup=-
+================================================================================
+[10:13:22] Rebag 261006853 | Web B RefNo: 261006853 | Status: Draft | Verdict: PASS
+Remarks (A): Rebag Frz Chicken Breast B/Less Local. Susut 0.29.
+Remarks (B): Rebag Frz Chicken Breast B/Less Local. Susut 0.29.
+Remarks check: match
+Bahan Baku (1/1 matched):
+  - [1] CID2NON006 | Frz Chicken Breast B/Less Local | 27.29 KG | OK
+Bahan Jadi (1/1 matched):
+  - [1] ZCIDNON009 | FRZ Chicken Steak | 27.0 KG | OK
+  - [2] AAU2NON00001 | item Susut | 0.29 KG | SUSUT (skipped)
+Problems: none
+Re-check #2 (previous: 2026-10-06 10:13:18 -> PASS)
+
+#ENTRY | time=2026-10-06 10:13:32 | doc=261006853 | fp=27582dd74c71 | verdict=PASS | status=Posted | recheck=3 | dup=-
+================================================================================
+[10:13:32] Rebag 261006853 | Web B RefNo: 261006853 | Status: Posted | Verdict: PASS
+Remarks (A): Rebag Frz Chicken Breast B/Less Local. Susut 0.29.
+Remarks (B): Rebag Frz Chicken Breast B/Less Local. Susut 0.29.
+Remarks check: match
+Bahan Baku (1/1 matched):
+  - [1] CID2NON006 | Frz Chicken Breast B/Less Local | 27.29 KG | OK
+Bahan Jadi (1/1 matched):
+  - [1] ZCIDNON009 | FRZ Chicken Steak | 27.0 KG | OK
+  - [2] AAU2NON00001 | item Susut | 0.29 KG | SUSUT (skipped)
+Problems: none
+Re-check #3 (previous: 2026-10-06 10:13:22 -> PASS)
+
+#ENTRY | time=2026-10-06 11:23:34 | doc=261006296 | fp=29d13dbebdd1 | verdict=FAIL | status=Draft | recheck=1 | dup=-
+================================================================================
+[11:23:34] Rebag 261006296 | Web B RefNo: 261006296 | Status: Draft | Verdict: FAIL
+Remarks (A): Rebag Karton Coklat 520x370x265mm.
+Remarks (B): Rebag Karton Coklat 520x370x265mm.
+Remarks check: match
+Bahan Baku (0/1 matched):
+  - [1] RIN3NON009 | Karton Coklat 520x370x265mm | 1.0 PCS | MISMATCH: Not found in Web B
+Bahan Jadi (0/1 matched):
+  - [1] RIN3NON010 | Karton Coklat 520x370x265mm, PACKING | 1.0 PCS | MISMATCH: Not found in Web B
+Problems: 
+  ! Bahan Baku [1] RIN3NON009: Not found in Web B
+  ! Bahan Jadi [1] RIN3NON010: Not found in Web B
+
+#ENTRY | time=2026-10-06 11:23:39 | doc=261006296 | fp=29d13dbebdd1 | verdict=PASS | status=Draft | recheck=2 | dup=-
+================================================================================
+[11:23:39] Rebag 261006296 | Web B RefNo: 261006296 | Status: Draft | Verdict: PASS
+Remarks (A): Rebag Karton Coklat 520x370x265mm.
+Remarks (B): Rebag Karton Coklat 520x370x265mm.
+Remarks check: match
+Bahan Baku (1/1 matched):
+  - [1] RIN3NON009 | Karton Coklat 520x370x265mm | 1.0 PCS | OK
+Bahan Jadi (1/1 matched):
+  - [1] RIN3NON010 | Karton Coklat 520x370x265mm, PACKING | 1.0 PCS | OK
+Problems: none
+Re-check #2 (previous: 2026-10-06 11:23:34 -> FAIL)
+
+#ENTRY | time=2026-10-06 11:23:40 | doc=261006296 | fp=29d13dbebdd1 | verdict=PASS | status=Draft | recheck=3 | dup=-
+================================================================================
+[11:23:40] Rebag 261006296 | Web B RefNo: 261006296 | Status: Draft | Verdict: PASS
+Remarks (A): Rebag Karton Coklat 520x370x265mm.
+Remarks (B): Rebag Karton Coklat 520x370x265mm.
+Remarks check: match
+Bahan Baku (1/1 matched):
+  - [1] RIN3NON009 | Karton Coklat 520x370x265mm | 1.0 PCS | OK
+Bahan Jadi (1/1 matched):
+  - [1] RIN3NON010 | Karton Coklat 520x370x265mm, PACKING | 1.0 PCS | OK
+Problems: none
+Re-check #3 (previous: 2026-10-06 11:23:39 -> PASS)
+
+#ENTRY | time=2026-10-06 11:23:41 | doc=261006296 | fp=29d13dbebdd1 | verdict=PASS | status=Draft | recheck=4 | dup=-
+================================================================================
+[11:23:41] Rebag 261006296 | Web B RefNo: 261006296 | Status: Draft | Verdict: PASS
+Remarks (A): Rebag Karton Coklat 520x370x265mm.
+Remarks (B): Rebag Karton Coklat 520x370x265mm.
+Remarks check: match
+Bahan Baku (1/1 matched):
+  - [1] RIN3NON009 | Karton Coklat 520x370x265mm | 1.0 PCS | OK
+Bahan Jadi (1/1 matched):
+  - [1] RIN3NON010 | Karton Coklat 520x370x265mm, PACKING | 1.0 PCS | OK
+Problems: none
+Re-check #4 (previous: 2026-10-06 11:23:40 -> PASS)
+
+#ENTRY | time=2026-10-06 11:23:48 | doc=261006296 | fp=29d13dbebdd1 | verdict=PASS | status=Posted | recheck=5 | dup=-
+================================================================================
+[11:23:48] Rebag 261006296 | Web B RefNo: 261006296 | Status: Posted | Verdict: PASS
+Remarks (A): Rebag Karton Coklat 520x370x265mm.
+Remarks (B): Rebag Karton Coklat 520x370x265mm.
+Remarks check: match
+Bahan Baku (1/1 matched):
+  - [1] RIN3NON009 | Karton Coklat 520x370x265mm | 1.0 PCS | OK
+Bahan Jadi (1/1 matched):
+  - [1] RIN3NON010 | Karton Coklat 520x370x265mm, PACKING | 1.0 PCS | OK
+Problems: none
+Re-check #5 (previous: 2026-10-06 11:23:41 -> PASS)
+
+#ENTRY | time=2026-10-06 11:44:18 | doc=261006296 | fp=29d13dbebdd1 | verdict=PASS | status=Posted | recheck=6 | dup=-
+================================================================================
+[11:44:18] Rebag 261006296 | Web B RefNo: 261006296 | Status: Posted | Verdict: PASS
+Remarks (A): Rebag Karton Coklat 520x370x265mm.
+Remarks (B): Rebag Karton Coklat 520x370x265mm.
+Remarks check: match
+Bahan Baku (1/1 matched):
+  - [1] RIN3NON009 | Karton Coklat 520x370x265mm | 1.0 PCS | OK
+Bahan Jadi (1/1 matched):
+  - [1] RIN3NON010 | Karton Coklat 520x370x265mm, PACKING | 1.0 PCS | OK
+Problems: none
+Re-check #6 (previous: 2026-10-06 11:23:48 -> PASS)
+
+#ENTRY | time=2026-10-06 13:07:38 | doc=261006899 | fp=1e08ef8c97d6 | verdict=PASS | status=Draft | recheck=1 | dup=-
+================================================================================
+[13:07:38] Rebag 261006899 | Web B RefNo: 261006899 | Status: Draft | Verdict: PASS
+Remarks (A): Rebag Nz Frz Beef Lips (Affco).
+Remarks (B): Rebag Nz Frz Beef Lips (Affco).
+Remarks check: match
+Bahan Baku (1/1 matched):
+  - [1] ANZ2AFF037 | Nz Frz Beef Lips (Affco) | 45.0 KG | OK
+Bahan Jadi (2/2 matched):
+  - [1] AAU2NON122 | Frz Beef Lips | 44.65 KG | OK
+  - [2] AAU2NON076 | Frozen 45 Cl | 0.35 KG | OK
+Problems: none
+
+#ENTRY | time=2026-10-06 13:07:38 | doc=261006899 | fp=1e08ef8c97d6 | verdict=PASS | status=Draft | recheck=2 | dup=-
+================================================================================
+[13:07:38] Rebag 261006899 | Web B RefNo: 261006899 | Status: Draft | Verdict: PASS
+Remarks (A): Rebag Nz Frz Beef Lips (Affco).
+Remarks (B): Rebag Nz Frz Beef Lips (Affco).
+Remarks check: match
+Bahan Baku (1/1 matched):
+  - [1] ANZ2AFF037 | Nz Frz Beef Lips (Affco) | 45.0 KG | OK
+Bahan Jadi (2/2 matched):
+  - [1] AAU2NON122 | Frz Beef Lips | 44.65 KG | OK
+  - [2] AAU2NON076 | Frozen 45 Cl | 0.35 KG | OK
+Problems: none
+Re-check #2 (previous: 2026-10-06 13:07:38 -> PASS)
+
+#ENTRY | time=2026-10-06 13:08:25 | doc=261006899 | fp=1e08ef8c97d6 | verdict=PASS | status=Posted | recheck=3 | dup=-
+================================================================================
+[13:08:25] Rebag 261006899 | Web B RefNo: 261006899 | Status: Posted | Verdict: PASS
+Remarks (A): Rebag Nz Frz Beef Lips (Affco).
+Remarks (B): Rebag Nz Frz Beef Lips (Affco).
+Remarks check: match
+Bahan Baku (1/1 matched):
+  - [1] ANZ2AFF037 | Nz Frz Beef Lips (Affco) | 45.0 KG | OK
+Bahan Jadi (2/2 matched):
+  - [1] AAU2NON122 | Frz Beef Lips | 44.65 KG | OK
+  - [2] AAU2NON076 | Frozen 45 Cl | 0.35 KG | OK
+Problems: none
+Re-check #3 (previous: 2026-10-06 13:07:38 -> PASS)
+
+#ENTRY | time=2026-10-06 15:16:05 | doc=261006915 | fp=393abad81e7d | verdict=PASS | status=Draft | recheck=1 | dup=-
+================================================================================
+[15:16:05] Rebag 261006915 | Web B RefNo: 261006915 | Status: Draft | Verdict: PASS
+Remarks (A): Rebag Aus Frz A Striploin (Midfield). Susut 0.08.
+Remarks (B): Rebag Aus Frz A Striploin (Midfield). Susut 0.08.
+Remarks check: match
+Bahan Baku (1/1 matched):
+  - [1] AAU2MID008 | Aus Frz A Striploin (Midfield) | 19.97 KG | OK
+Bahan Jadi (2/2 matched):
+  - [1] AAU2TEY022 | Aus Frz Striploin S Cut Steak | 18.69 KG | OK
+  - [2] AAU2NON035 | Aus Frozen Fat Trimming | 1.2 KG | OK
+  - [3] AAU2NON00001 | item Susut | 0.08 KG | SUSUT (skipped)
+Problems: none
+
+#ENTRY | time=2026-10-06 15:16:06 | doc=261006915 | fp=393abad81e7d | verdict=PASS | status=Draft | recheck=2 | dup=-
+================================================================================
+[15:16:06] Rebag 261006915 | Web B RefNo: 261006915 | Status: Draft | Verdict: PASS
+Remarks (A): Rebag Aus Frz A Striploin (Midfield). Susut 0.08.
+Remarks (B): Rebag Aus Frz A Striploin (Midfield). Susut 0.08.
+Remarks check: match
+Bahan Baku (1/1 matched):
+  - [1] AAU2MID008 | Aus Frz A Striploin (Midfield) | 19.97 KG | OK
+Bahan Jadi (2/2 matched):
+  - [1] AAU2TEY022 | Aus Frz Striploin S Cut Steak | 18.69 KG | OK
+  - [2] AAU2NON035 | Aus Frozen Fat Trimming | 1.2 KG | OK
+  - [3] AAU2NON00001 | item Susut | 0.08 KG | SUSUT (skipped)
+Problems: none
+Re-check #2 (previous: 2026-10-06 15:16:05 -> PASS)
+
+#ENTRY | time=2026-10-06 15:16:12 | doc=261006915 | fp=393abad81e7d | verdict=PASS | status=Draft | recheck=3 | dup=-
+================================================================================
+[15:16:12] Rebag 261006915 | Web B RefNo: 261006915 | Status: Draft | Verdict: PASS
+Remarks (A): Rebag Aus Frz A Striploin (Midfield). Susut 0.08.
+Remarks (B): Rebag Aus Frz A Striploin (Midfield). Susut 0.08.
+Remarks check: match
+Bahan Baku (1/1 matched):
+  - [1] AAU2MID008 | Aus Frz A Striploin (Midfield) | 19.97 KG | OK
+Bahan Jadi (2/2 matched):
+  - [1] AAU2TEY022 | Aus Frz Striploin S Cut Steak | 18.69 KG | OK
+  - [2] AAU2NON035 | Aus Frozen Fat Trimming | 1.2 KG | OK
+  - [3] AAU2NON00001 | item Susut | 0.08 KG | SUSUT (skipped)
+Problems: none
+Re-check #3 (previous: 2026-10-06 15:16:06 -> PASS)
+
+#ENTRY | time=2026-10-06 15:16:13 | doc=261006915 | fp=393abad81e7d | verdict=PASS | status=Posted | recheck=4 | dup=-
+================================================================================
+[15:16:13] Rebag 261006915 | Web B RefNo: 261006915 | Status: Posted | Verdict: PASS
+Remarks (A): Rebag Aus Frz A Striploin (Midfield). Susut 0.08.
+Remarks (B): Rebag Aus Frz A Striploin (Midfield). Susut 0.08.
+Remarks check: match
+Bahan Baku (1/1 matched):
+  - [1] AAU2MID008 | Aus Frz A Striploin (Midfield) | 19.97 KG | OK
+Bahan Jadi (2/2 matched):
+  - [1] AAU2TEY022 | Aus Frz Striploin S Cut Steak | 18.69 KG | OK
+  - [2] AAU2NON035 | Aus Frozen Fat Trimming | 1.2 KG | OK
+  - [3] AAU2NON00001 | item Susut | 0.08 KG | SUSUT (skipped)
+Problems: none
+Re-check #4 (previous: 2026-10-06 15:16:12 -> PASS)
+
+#ENTRY | time=2026-10-06 15:16:54 | doc=261006627 | fp=b573d05d261c | verdict=FAIL | status=Draft | recheck=1 | dup=-
+================================================================================
+[15:16:54] Rebag 261006627 | Web B RefNo: 261006627 | Status: Draft | Verdict: FAIL
+Remarks (A): Rebag Us Frz 121 Short Plate (GOP). Susut 0.25.
+Remarks (B): Rebag Us Frz 121 Short Plate (GOP). Susut 0.25.
+Remarks check: match
+Bahan Baku (0/1 matched):
+  - [1] AUS2GOP091 | Us Frz 121 Short Plate (GOP) | 1539.05 KG | MISMATCH: Qty: A=1539.05 B=0.0
+Bahan Jadi (0/2 matched):
+  - [1] AUS2SWF059 | US Frz Short Plate Yakiniku Swift | 1467.0 KG | MISMATCH: Qty: A=1467.0 B=0.0
+  - [2] AAU2NON035 | Aus Frozen Fat Trimming | 71.8 KG | MISMATCH: Qty: A=71.8 B=0.0
+  - [3] AAU2NON00001 | item Susut | 0.25 KG | SUSUT (skipped)
+Problems: 
+  ! Bahan Baku [1] AUS2GOP091: Qty: A=1539.05 B=0.0
+  ! Bahan Jadi [1] AUS2SWF059: Qty: A=1467.0 B=0.0
+  ! Bahan Jadi [2] AAU2NON035: Qty: A=71.8 B=0.0
+
+#ENTRY | time=2026-10-06 15:17:02 | doc=261006627 | fp=b573d05d261c | verdict=FAIL | status=Draft | recheck=2 | dup=-
+================================================================================
+[15:17:02] Rebag 261006627 | Web B RefNo: 261006627 | Status: Draft | Verdict: FAIL
+Remarks (A): Rebag Us Frz 121 Short Plate (GOP). Susut 0.25.
+Remarks (B): Rebag Us Frz 121 Short Plate (GOP). Susut 0.25.
+Remarks check: match
+Bahan Baku (0/1 matched):
+  - [1] AUS2GOP091 | Us Frz 121 Short Plate (GOP) | 1539.05 KG | MISMATCH: Qty: A=1539.05 B=0.0
+Bahan Jadi (0/2 matched):
+  - [1] AUS2SWF059 | US Frz Short Plate Yakiniku Swift | 1467.0 KG | MISMATCH: Qty: A=1467.0 B=0.0
+  - [2] AAU2NON035 | Aus Frozen Fat Trimming | 71.8 KG | MISMATCH: Qty: A=71.8 B=0.0
+  - [3] AAU2NON00001 | item Susut | 0.25 KG | SUSUT (skipped)
+Problems: 
+  ! Bahan Baku [1] AUS2GOP091: Qty: A=1539.05 B=0.0
+  ! Bahan Jadi [1] AUS2SWF059: Qty: A=1467.0 B=0.0
+  ! Bahan Jadi [2] AAU2NON035: Qty: A=71.8 B=0.0
+Re-check #2 (previous: 2026-10-06 15:16:54 -> FAIL)
+
+#ENTRY | time=2026-10-06 15:17:20 | doc=261006627 | fp=b573d05d261c | verdict=PASS | status=Draft | recheck=3 | dup=-
+================================================================================
+[15:17:20] Rebag 261006627 | Web B RefNo: 261006627 | Status: Draft | Verdict: PASS
+Remarks (A): Rebag Us Frz 121 Short Plate (GOP). Susut 0.25.
+Remarks (B): Rebag Us Frz 121 Short Plate (GOP). Susut 0.25.
+Remarks check: match
+Bahan Baku (1/1 matched):
+  - [1] AUS2GOP091 | Us Frz 121 Short Plate (GOP) | 1539.05 KG | OK
+Bahan Jadi (2/2 matched):
+  - [1] AUS2SWF059 | US Frz Short Plate Yakiniku Swift | 1467.0 KG | OK
+  - [2] AAU2NON035 | Aus Frozen Fat Trimming | 71.8 KG | OK
+  - [3] AAU2NON00001 | item Susut | 0.25 KG | SUSUT (skipped)
+Problems: none
+Re-check #3 (previous: 2026-10-06 15:17:02 -> FAIL)
+
+#ENTRY | time=2026-10-06 15:17:22 | doc=261006627 | fp=b573d05d261c | verdict=PASS | status=Draft | recheck=4 | dup=-
+================================================================================
+[15:17:22] Rebag 261006627 | Web B RefNo: 261006627 | Status: Draft | Verdict: PASS
+Remarks (A): Rebag Us Frz 121 Short Plate (GOP). Susut 0.25.
+Remarks (B): Rebag Us Frz 121 Short Plate (GOP). Susut 0.25.
+Remarks check: match
+Bahan Baku (1/1 matched):
+  - [1] AUS2GOP091 | Us Frz 121 Short Plate (GOP) | 1539.05 KG | OK
+Bahan Jadi (2/2 matched):
+  - [1] AUS2SWF059 | US Frz Short Plate Yakiniku Swift | 1467.0 KG | OK
+  - [2] AAU2NON035 | Aus Frozen Fat Trimming | 71.8 KG | OK
+  - [3] AAU2NON00001 | item Susut | 0.25 KG | SUSUT (skipped)
+Problems: none
+Re-check #4 (previous: 2026-10-06 15:17:20 -> PASS)
+
+#ENTRY | time=2026-10-06 15:17:32 | doc=261006627 | fp=b573d05d261c | verdict=PASS | status=Posted | recheck=5 | dup=-
+================================================================================
+[15:17:32] Rebag 261006627 | Web B RefNo: 261006627 | Status: Posted | Verdict: PASS
+Remarks (A): Rebag Us Frz 121 Short Plate (GOP). Susut 0.25.
+Remarks (B): Rebag Us Frz 121 Short Plate (GOP). Susut 0.25.
+Remarks check: match
+Bahan Baku (1/1 matched):
+  - [1] AUS2GOP091 | Us Frz 121 Short Plate (GOP) | 1539.05 KG | OK
+Bahan Jadi (2/2 matched):
+  - [1] AUS2SWF059 | US Frz Short Plate Yakiniku Swift | 1467.0 KG | OK
+  - [2] AAU2NON035 | Aus Frozen Fat Trimming | 71.8 KG | OK
+  - [3] AAU2NON00001 | item Susut | 0.25 KG | SUSUT (skipped)
+Problems: none
+Re-check #5 (previous: 2026-10-06 15:17:22 -> PASS)
+
+#ENTRY | time=2026-10-06 15:17:33 | doc=261006627 | fp=b573d05d261c | verdict=PASS | status=Posted | recheck=6 | dup=-
+================================================================================
+[15:17:33] Rebag 261006627 | Web B RefNo: 261006627 | Status: Posted | Verdict: PASS
+Remarks (A): Rebag Us Frz 121 Short Plate (GOP). Susut 0.25.
+Remarks (B): Rebag Us Frz 121 Short Plate (GOP). Susut 0.25.
+Remarks check: match
+Bahan Baku (1/1 matched):
+  - [1] AUS2GOP091 | Us Frz 121 Short Plate (GOP) | 1539.05 KG | OK
+Bahan Jadi (2/2 matched):
+  - [1] AUS2SWF059 | US Frz Short Plate Yakiniku Swift | 1467.0 KG | OK
+  - [2] AAU2NON035 | Aus Frozen Fat Trimming | 71.8 KG | OK
+  - [3] AAU2NON00001 | item Susut | 0.25 KG | SUSUT (skipped)
+Problems: none
+Re-check #6 (previous: 2026-10-06 15:17:32 -> PASS)
+
+#ENTRY | time=2026-10-06 15:18:16 | doc=261006196 | fp=6a779c4fdbf7 | verdict=PASS | status=Draft | recheck=1 | dup=-
+================================================================================
+[15:18:16] Rebag 261006196 | Web B RefNo: 261006196 | Status: Draft | Verdict: PASS
+Remarks (A): Rebag Brazil Frz Knuckle 21736. Susut 0.16.
+Remarks (B): Rebag Brazil Frz Knuckle 21736. Susut 0.16.
+Remarks check: match
+Bahan Baku (1/1 matched):
+  - [1] ABR2MVD002 | Brazil Frz Knuckle 21736 | 27.2 KG | OK
+Bahan Jadi (2/2 matched):
+  - [1] AAU2NON068 | AUS Frozen Saikoro I | 24.5 KG | OK
+  - [2] AAU2NON035 | Aus Frozen Fat Trimming | 2.54 KG | OK
+  - [3] AAU2NON00001 | item Susut | 0.16 KG | SUSUT (skipped)
+Problems: none
+
+#ENTRY | time=2026-10-06 15:18:17 | doc=261006196 | fp=6a779c4fdbf7 | verdict=PASS | status=Draft | recheck=2 | dup=-
+================================================================================
+[15:18:17] Rebag 261006196 | Web B RefNo: 261006196 | Status: Draft | Verdict: PASS
+Remarks (A): Rebag Brazil Frz Knuckle 21736. Susut 0.16.
+Remarks (B): Rebag Brazil Frz Knuckle 21736. Susut 0.16.
+Remarks check: match
+Bahan Baku (1/1 matched):
+  - [1] ABR2MVD002 | Brazil Frz Knuckle 21736 | 27.2 KG | OK
+Bahan Jadi (2/2 matched):
+  - [1] AAU2NON068 | AUS Frozen Saikoro I | 24.5 KG | OK
+  - [2] AAU2NON035 | Aus Frozen Fat Trimming | 2.54 KG | OK
+  - [3] AAU2NON00001 | item Susut | 0.16 KG | SUSUT (skipped)
+Problems: none
+Re-check #2 (previous: 2026-10-06 15:18:16 -> PASS)
+
+#ENTRY | time=2026-10-06 15:18:29 | doc=261006196 | fp=6a779c4fdbf7 | verdict=PASS | status=Posted | recheck=3 | dup=-
+================================================================================
+[15:18:29] Rebag 261006196 | Web B RefNo: 261006196 | Status: Posted | Verdict: PASS
+Remarks (A): Rebag Brazil Frz Knuckle 21736. Susut 0.16.
+Remarks (B): Rebag Brazil Frz Knuckle 21736. Susut 0.16.
+Remarks check: match
+Bahan Baku (1/1 matched):
+  - [1] ABR2MVD002 | Brazil Frz Knuckle 21736 | 27.2 KG | OK
+Bahan Jadi (2/2 matched):
+  - [1] AAU2NON068 | AUS Frozen Saikoro I | 24.5 KG | OK
+  - [2] AAU2NON035 | Aus Frozen Fat Trimming | 2.54 KG | OK
+  - [3] AAU2NON00001 | item Susut | 0.16 KG | SUSUT (skipped)
+Problems: none
+Re-check #3 (previous: 2026-10-06 15:18:17 -> PASS)
+
+#ENTRY | time=2026-10-06 15:19:01 | doc=261006408 | fp=21002c68f8f0 | verdict=PASS | status=Draft | recheck=1 | dup=-
+================================================================================
+[15:19:01] Rebag 261006408 | Web B RefNo: 261006408 | Status: Draft | Verdict: PASS
+Remarks (A): Rebag Frz Chicken Breast B/Less Local. Susut 7.94.
+Remarks (B): Rebag Frz Chicken Breast B/Less Local. Susut 7.94.
+Remarks check: match
+Bahan Baku (1/1 matched):
+  - [1] CID2NON006 | Frz Chicken Breast B/Less Local | 618.94 KG | OK
+Bahan Jadi (1/1 matched):
+  - [1] CID2NON008 | Frz Chicken G | 611.0 KG | OK
+  - [2] AAU2NON00001 | item Susut | 7.94 KG | SUSUT (skipped)
+Problems: none
+

@@ -10,6 +10,6 @@ echo Step 3
 python --version
 
 echo Step 4
-python rebag_semi_automate.py
+python rebag_semi_automate_v5.py
 
 pause
