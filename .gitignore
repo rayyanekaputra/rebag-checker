@@ -5,3 +5,5 @@ creds.json
 *.html
 *_files/
 __pycache__/
+# Chrome DevTools Recorder exports (contain typed passwords)
+SAPWEB for CLAUDE.json
