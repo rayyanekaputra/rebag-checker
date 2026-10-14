@@ -11,6 +11,7 @@ import re
 import time
 import traceback
 
+from selenium.common.exceptions import ElementClickInterceptedException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
@@ -67,14 +68,24 @@ def wait_dx_idle(drv, timeout=20):
     raise RuntimeError(f"SAPWeb still busy after {timeout}s")
 
 
+def safe_click(drv, el):
+    drv.execute_script("arguments[0].scrollIntoView({block: 'center'});", el)
+    try:
+        el.click()
+    except ElementClickInterceptedException:
+        # A DevExpress layout box sits over the element; click it from JS instead.
+        drv.execute_script("arguments[0].click();", el)
+
+
 def dx_click(drv, el_id, timeout=15):
-    WebDriverWait(drv, timeout).until(EC.element_to_be_clickable((By.ID, el_id))).click()
+    el = WebDriverWait(drv, timeout).until(EC.element_to_be_clickable((By.ID, el_id)))
+    safe_click(drv, el)
     wait_dx_idle(drv)
 
 
 def dx_type(drv, el_id, text, then=Keys.TAB, timeout=15):
     el = WebDriverWait(drv, timeout).until(EC.element_to_be_clickable((By.ID, el_id)))
-    el.click()
+    safe_click(drv, el)
     el.send_keys(Keys.CONTROL, "a")
     el.send_keys(text)
     if then:
@@ -132,9 +143,9 @@ def set_grid_qtys(drv, side, items):
         if match is None:
             raise RuntimeError(f"{side}: grid row {n} has unexpected item '{kode}'")
         todo.remove(match)
-        drv.find_element(By.CSS_SELECTOR, f"#{grid}_DXDataRow{n} > td:nth-of-type({cols['qty'] + 1})").click()
+        safe_click(drv, drv.find_element(By.CSS_SELECTOR, f"#{grid}_DXDataRow{n} > td:nth-of-type({cols['qty'] + 1})"))
         dx_type(drv, f"{grid}_DXEditor{cols['qty']}_I", f"{match[1]:.4f}", then=None)
-        drv.find_element(By.ID, "Remarks_I").click()  # leave the cell so the edit is kept
+        safe_click(drv, drv.find_element(By.ID, "Remarks_I"))  # leave the cell so the edit is kept
         wait_dx_idle(drv)
         print(f"   {Fore.GREEN}✓ {kode} qty {match[1]:.4f}{Style.RESET_ALL}")
 
@@ -215,7 +226,7 @@ def fill_rebag(drv):
     except Exception as e:
         print(f"{Fore.RED}❌ Fill stopped ({type(e).__name__}): {e}{Style.RESET_ALL}")
         print(f"{Fore.YELLOW}   SAPWeb is left as it is. Finish or delete the draft by hand, "
-              f"then press ENTER to check it.{Style.RESET_ALL}")
+              f"then check it with v5 (runner.bat).{Style.RESET_ALL}")
         return None
 
     print(f"{Fore.GREEN}✓ Filled. Checking the result...{Style.RESET_ALL}")
@@ -231,12 +242,13 @@ def main():
     drv = start_session_with_retry(creds)
     if drv is None:
         return
-    print(f"\n{Fore.CYAN}Open a Web A detail page, then type 'fill'. 'quit' to exit.{Style.RESET_ALL}")
+    print(f"\n{Fore.CYAN}Open a Web A detail page, then press ENTER. 'quit' to exit.{Style.RESET_ALL}")
     while True:
-        cmd = input("\n['fill' | 'quit']: ").strip().lower()
+        cmd = input("\n[ENTER] Fill SAPWeb | 'quit' to exit: ").strip().lower()
         if cmd == "quit":
             break
-        if cmd != "fill":
+        if cmd != "":
+            print("Invalid input. Press ENTER or type 'quit'.")
             continue
         if not driver_alive(drv):
             print(f"{Fore.RED}🔌 Browser connection lost. Restart the script.{Style.RESET_ALL}")
