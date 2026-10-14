@@ -33,6 +33,9 @@ Domain terms (Indonesian):
   then runs the v5 check on it. Keep it a separate file: don't merge it into v5 or wire it into
   `runner.bat` unless the user asks. It imports login/extraction/compare/log functions from v5,
   so renaming or changing the signature of those v5 functions breaks it.
+  It also has a **`batch` mode** (added 2026-10-14, not yet run in production): it reads the
+  Web A list, then fills, checks, and waits for the operator to post each unfinished rebag
+  in turn (see "Web A list / batch mode" below). Batch code goes in this file too, not a new one.
 - `rebag_semi_automate_v1..v4.py`, `old_and_working.py` — historical versions, kept for reference.
   Don't edit them, and don't "fix" them to match v5.
 - `runner.bat` — Windows launcher (activates `.venv`, runs v5). Update the filename here if a new version is created.
@@ -154,7 +157,7 @@ and reading it. Things to know when you get pasted HTML:
   to capture a click path. It records ids/aria/xpath selectors for every step, including
   popups. The auto-fill was built from one. It records **everything typed, including
   passwords**: log in before you start recording. Recordings stay out of git
-  (`SAPWEB for CLAUDE.json` is in `.gitignore`; add new recording names there too). When reading one,
+  (`SAPWEB for CLAUDE.json` and `REBAG_WEB.json` are in `.gitignore`; add new recording names there too). When reading one,
   never repeat typed credentials back.
 - Recordings show clicks, not page structure. For grids and fields, ask for the HTML as well.
 - The plan is to automate HTML capture later (for example, dumping `page_source` to a file on
