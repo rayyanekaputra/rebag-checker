@@ -128,6 +128,18 @@ Everything depends on these. Whenever one changes, update the code **and this ta
   Keterangan is not typed; it shows a warning instead. It warns loudly if the doc is already in
   the logs. Keep the `yes` confirmation unless the user asks to remove it.
 
+**Web A list / batch mode** (`batch` command in `rebag_autofill_prototype.py`)
+- List: `index_rebag.php`, a date form `startDate` / `endDate` (defaults to today, values set
+  from JS and the form submitted), then a client-side DataTable `#rebagTable`. Columns are found
+  by header text: `No. Dokumen`, `Nama Item`, `Status B1`; the `Lihat` link is
+  `a[href*='detail_rebag.php?no_doc=']`. Pages: click `#rebagTable_next` until its class has `disabled`.
+- Pending = Status B1 not `Selesai` / `Cancel` (case-insensitive; blank counts as pending).
+- Detail page status: `//label[@for='status']` ("Status: Selesai"). Web A flips to Selesai by
+  itself after SAPWeb posts; the batch only warns if it hasn't.
+- Flow: summary → ENTER → per rebag: new Web A tab → plan → `yes` → new SAPWeb tab → fill →
+  check → operator posts → ENTER → `Status_I` must contain "post" → close both tabs. FAIL or a
+  fill error leaves the tabs open and asks to skip/stop. Strictly one at a time (one driver).
+
 ## How selectors are discovered (current workflow)
 
 The author has no access to the sites' source. Selectors come from **pasting the rendered

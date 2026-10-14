@@ -5,6 +5,9 @@
 # SAPWeb rebag, then runs the v5 check on the result. Never posts.
 # Reuses login / extraction / comparison / logging from rebag_semi_automate_v5.py.
 # Selectors come from a Chrome Recorder capture of a Draft (see the comment below).
+# Batch mode ('batch'): lists every rebag in the Web A list (index_rebag.php) whose Status B1
+# is not Selesai/Cancel, then fills, checks, waits for the operator to post, and closes the tabs,
+# one rebag at a time.
 # Run: python rebag_autofill_prototype.py   (Windows, company network only)
 # =============================================================================
 import re
@@ -171,14 +174,7 @@ def fill_plan(data_a):
     return plan, blockers, notes
 
 
-def fill_rebag(drv):
-    web_a_window = find_window(drv, lambda url: DETAIL_URL_PATTERN in url)
-    if not web_a_window:
-        raise Exception("Web A detail tab not found. Open detail_rebag.php?no_doc=... in Web A first.")
-    print(f"\n{Fore.CYAN}🔍 Reading Web A (Rebag Log)...{Style.RESET_ALL}")
-    data_a = extract_web_a(drv)
-    plan, blockers, notes = fill_plan(data_a)
-
+def show_plan(data_a, plan, notes):
     print(f"\n{Fore.CYAN}{Style.BRIGHT}Will create in SAPWeb:{Style.RESET_ALL}")
     print(f"   Ref No : {data_a['doc_number']}")
     print(f"   Remarks: {data_a['remarks']}")
@@ -193,24 +189,16 @@ def fill_rebag(drv):
     if prev:
         print(f"{Fore.RED}{Style.BRIGHT}🚨 Doc {data_a['doc_number']} is already in the logs "
               f"({prev[-1].get('time', '?')}, {prev[-1].get('verdict', '?')}). It may already exist in SAPWeb.{Style.RESET_ALL}")
-    if blockers:
-        for b in blockers:
-            print(f"{Fore.RED}❌ {b}{Style.RESET_ALL}")
-        print(f"{Fore.RED}Not filling.{Style.RESET_ALL}")
-        return None
-    if input("\nType 'yes' to create this rebag in SAPWeb: ").strip().lower() != "yes":
-        print("Cancelled.")
-        return None
 
-    web_b_window = find_window(drv, lambda url: "sapweb.indoguna.co.id" in url)
-    if not web_b_window:
-        drv.execute_script("window.open('');")
-        web_b_window = drv.window_handles[-1]
-    drv.switch_to.window(web_b_window)
+
+def open_new_form(drv):
     drv.get(WEB_B_NEW_REBAG_URL)
     WebDriverWait(drv, 20).until(EC.presence_of_element_located((By.ID, "RefNo_I")))
     wait_dx_idle(drv)
 
+
+def fill_and_check(drv, data_a, plan):
+    """Type the plan into the blank SAPWeb form in the current tab, save, then run the v5 check."""
     print(f"\n{Fore.CYAN}✍️  Filling SAPWeb...{Style.RESET_ALL}")
     try:
         dx_type(drv, "RefNo_I", data_a["doc_number"])
@@ -232,9 +220,242 @@ def fill_rebag(drv):
     print(f"{Fore.GREEN}✓ Filled. Checking the result...{Style.RESET_ALL}")
     time.sleep(1)
     data_b = extract_web_b(drv)
-    result = finish_check(data_a, data_b)
-    print(f"{Fore.YELLOW}👉 Not posted. Review SAPWeb, then post it yourself.{Style.RESET_ALL}")
+    return finish_check(data_a, data_b)
+
+
+def fill_rebag(drv):
+    web_a_window = find_window(drv, lambda url: DETAIL_URL_PATTERN in url)
+    if not web_a_window:
+        raise Exception("Web A detail tab not found. Open detail_rebag.php?no_doc=... in Web A first.")
+    print(f"\n{Fore.CYAN}🔍 Reading Web A (Rebag Log)...{Style.RESET_ALL}")
+    data_a = extract_web_a(drv)
+    plan, blockers, notes = fill_plan(data_a)
+    show_plan(data_a, plan, notes)
+    if blockers:
+        for b in blockers:
+            print(f"{Fore.RED}❌ {b}{Style.RESET_ALL}")
+        print(f"{Fore.RED}Not filling.{Style.RESET_ALL}")
+        return None
+    if input("\nType 'yes' to create this rebag in SAPWeb: ").strip().lower() != "yes":
+        print("Cancelled.")
+        return None
+
+    web_b_window = find_window(drv, lambda url: "sapweb.indoguna.co.id" in url)
+    if not web_b_window:
+        drv.execute_script("window.open('');")
+        web_b_window = drv.window_handles[-1]
+    drv.switch_to.window(web_b_window)
+    open_new_form(drv)
+    result = fill_and_check(drv, data_a, plan)
+    if result:
+        print(f"{Fore.YELLOW}👉 Not posted. Review SAPWeb, then post it yourself.{Style.RESET_ALL}")
     return result
+
+
+# =============================================================================
+# BATCH: every unfinished rebag in the Web A list, one at a time
+# =============================================================================
+# index_rebag.php is a client-side DataTable (#rebagTable) behind a From/To date form
+# (startDate / endDate, defaults to today). Columns: No, Tanggal, No. Dokumen, Nama Item,
+# Cek (Lihat link), Status B1, Oleh, Diedit. Pages via #rebagTable_next ('disabled' on the last).
+LIST_URL = "http://192.168.1.14:8080/rebag/index_rebag.php"
+DONE_STATUSES = ("selesai", "cancel")
+
+
+def ask_date(label, default):
+    while True:
+        text = input(f"{label} (YYYY-MM-DD) [{default}]: ").strip() or default
+        if re.fullmatch(r"\d{4}-\d{2}-\d{2}", text):
+            return text
+        print("Use the format YYYY-MM-DD.")
+
+
+def list_pending(drv, start, end):
+    """[(doc, status, nama, url)] for rows whose Status B1 is not Selesai/Cancel, all pages."""
+    drv.get(LIST_URL)
+    WebDriverWait(drv, 15).until(EC.presence_of_element_located((By.ID, "startDate")))
+    # Date inputs depend on the Windows locale when typed, so set the values directly.
+    drv.execute_script("document.getElementById('startDate').value = arguments[0];"
+                       "document.getElementById('endDate').value = arguments[1];"
+                       "document.getElementById('startDate').form.submit();", start, end)
+    WebDriverWait(drv, 15).until(EC.presence_of_element_located((By.ID, "rebagTable_next")))
+
+    headers = [th.text.strip().lower() for th in drv.find_elements(By.CSS_SELECTOR, "#rebagTable thead th")]
+    try:
+        i_doc, i_status, i_nama = headers.index("no. dokumen"), headers.index("status b1"), headers.index("nama item")
+    except ValueError:
+        raise RuntimeError(f"Web A list columns changed: {headers}")
+
+    rows, seen, page = [], set(), 1
+    while True:
+        for tr in drv.find_elements(By.CSS_SELECTOR, "#rebagTable tbody tr"):
+            tds = tr.find_elements(By.TAG_NAME, "td")
+            if len(tds) <= i_status:
+                continue  # "No data available" row
+            doc = tds[i_doc].text.strip()
+            links = tr.find_elements(By.CSS_SELECTOR, f"a[href*='{DETAIL_URL_PATTERN}']")
+            if not doc or doc in seen:
+                continue
+            seen.add(doc)
+            rows.append((doc, tds[i_status].text.strip(), tds[i_nama].text.strip(),
+                         links[0].get_attribute("href") if links else ""))
+        nxt = drv.find_element(By.ID, "rebagTable_next")
+        if "disabled" in (nxt.get_attribute("class") or ""):
+            break
+        page += 1
+        if page > 200:
+            raise RuntimeError("Web A list: more than 200 pages, stopping")
+        safe_click(drv, nxt)
+        time.sleep(0.3)
+
+    print(f"{Fore.CYAN}ℹ️  Read {len(rows)} rebag(s) on {page} page(s).{Style.RESET_ALL}")
+    pending = [r for r in rows if r[1].lower() not in DONE_STATUSES]
+    for doc, _st, _nm, url in pending:
+        if not url:
+            raise RuntimeError(f"Web A list: no Lihat link for {doc}")
+    return pending
+
+
+def ask_choice(prompt, choices):
+    while True:
+        ans = input(prompt).strip().lower()
+        if ans in choices:
+            return ans
+        print(f"Type one of: {', '.join(c or 'ENTER' for c in choices)}")
+
+
+def web_b_status(drv):
+    drv.refresh()
+    WebDriverWait(drv, 20).until(EC.presence_of_element_located((By.ID, "Status_I")))
+    wait_dx_idle(drv)
+    return drv.find_element(By.ID, "Status_I").get_attribute("value").strip()
+
+
+def web_a_status(drv):
+    drv.refresh()
+    labels = WebDriverWait(drv, 10).until(
+        EC.presence_of_all_elements_located((By.XPATH, "//label[@for='status']")))
+    return labels[0].text.replace("Status:", "").strip()
+
+
+def close_tabs(drv, handles, back_to):
+    for h in handles:
+        if h in drv.window_handles:
+            drv.switch_to.window(h)
+            drv.close()
+    drv.switch_to.window(back_to)
+
+
+def batch_one(drv, doc, url, list_window):
+    """Fill, check, wait for posting, close. Returns 'done', 'skip' or 'stop'."""
+    drv.switch_to.new_window("tab")
+    a_window = drv.current_window_handle
+    drv.get(url)
+    print(f"\n{Fore.CYAN}🔍 Reading Web A {doc}...{Style.RESET_ALL}")
+    data_a = extract_web_a(drv)
+    plan, blockers, notes = fill_plan(data_a)
+    show_plan(data_a, plan, notes)
+    if blockers:
+        for b in blockers:
+            print(f"{Fore.RED}❌ {b}{Style.RESET_ALL}")
+        ans = ask_choice("\nCan't fill this one. [ENTER] skip | 'stop': ", ("", "stop"))
+        close_tabs(drv, [a_window], list_window)
+        return "stop" if ans == "stop" else "skip"
+    ans = ask_choice("\nType 'yes' to create it in SAPWeb | 'skip' | 'stop': ", ("yes", "skip", "stop"))
+    if ans != "yes":
+        close_tabs(drv, [a_window], list_window)
+        return ans
+
+    drv.switch_to.new_window("tab")
+    b_window = drv.current_window_handle
+    open_new_form(drv)
+    result = fill_and_check(drv, data_a, plan)
+    if result is None or result["verdict"] != "PASS":
+        print(f"{Fore.RED}{Style.BRIGHT}👉 Not ready to post. Both tabs stay open so you can fix it by hand.{Style.RESET_ALL}")
+        ans = ask_choice("[ENTER] skip to the next rebag | 'stop': ", ("", "stop"))
+        drv.switch_to.window(list_window)
+        return "stop" if ans == "stop" else "skip"
+
+    print(f"{Fore.YELLOW}{Style.BRIGHT}👉 Review and POST it in SAPWeb (the newest tab).{Style.RESET_ALL}")
+    while True:
+        ans = ask_choice("[ENTER] when posted | 'skip' (leave tabs open) | 'stop': ", ("", "skip", "stop"))
+        if ans:
+            drv.switch_to.window(list_window)
+            return ans
+        drv.switch_to.window(b_window)
+        try:
+            status_b = web_b_status(drv)
+        except Exception as e:
+            print(f"{Fore.RED}❌ Could not read SAPWeb status ({type(e).__name__}): {e}{Style.RESET_ALL}")
+            continue
+        if "post" not in status_b.lower():
+            print(f"{Fore.RED}❌ SAPWeb status is '{status_b}', not Posted yet.{Style.RESET_ALL}")
+            continue
+        print(f"{Fore.GREEN}✓ SAPWeb status: {status_b}{Style.RESET_ALL}")
+        break
+
+    drv.switch_to.window(a_window)
+    try:
+        status_a = web_a_status(drv)
+        if status_a.lower() == "selesai":
+            print(f"{Fore.GREEN}✓ Web A status: {status_a}{Style.RESET_ALL}")
+        else:
+            print(f"{Fore.YELLOW}⚠️  Web A status is '{status_a}', not Selesai yet. Check it later.{Style.RESET_ALL}")
+    except Exception as e:
+        print(f"{Fore.YELLOW}⚠️  Could not read Web A status ({type(e).__name__}): {e}{Style.RESET_ALL}")
+    close_tabs(drv, [b_window, a_window], list_window)
+    return "done"
+
+
+def run_batch(drv):
+    today = time.strftime("%Y-%m-%d")
+    start = ask_date("From", today)
+    end = ask_date("To", start)
+    list_window = find_window(drv, lambda url: "192.168.1.14:8080/rebag" in url)
+    if list_window:
+        drv.switch_to.window(list_window)
+    else:
+        drv.switch_to.new_window("tab")
+        list_window = drv.current_window_handle
+    print(f"\n{Fore.CYAN}🔍 Reading the Web A rebag list {start} to {end}...{Style.RESET_ALL}")
+    pending = list_pending(drv, start, end)
+    if not pending:
+        print(f"{Fore.GREEN}✓ Nothing to rebag: every rebag is Selesai or Cancel.{Style.RESET_ALL}")
+        return
+
+    counts = {}
+    for _doc, status, _nm, _url in pending:
+        counts[status or "(blank)"] = counts.get(status or "(blank)", 0) + 1
+    print(f"\n{Fore.CYAN}{Style.BRIGHT}{len(pending)} rebag(s) to do: "
+          + ", ".join(f"{n} {st}" for st, n in counts.items()) + Style.RESET_ALL)
+    for i, (doc, status, nama, _url) in enumerate(pending, start=1):
+        print(f"   {i:>3}. {doc:<18} {status or '(blank)':<12} {nama}")
+    if ask_choice("\n[ENTER] start | 'cancel': ", ("", "cancel")):
+        return
+
+    done, skipped = [], []
+    for i, (doc, _st, _nm, url) in enumerate(pending, start=1):
+        print(f"\n{Fore.CYAN}{Style.BRIGHT}===== {i}/{len(pending)}: {doc} ====={Style.RESET_ALL}")
+        if not driver_alive(drv):
+            print(f"{Fore.RED}🔌 Browser connection lost. Restart the script.{Style.RESET_ALL}")
+            skipped.extend(d for d, *_ in pending[i - 1:])
+            break
+        try:
+            outcome = batch_one(drv, doc, url, list_window)
+        except Exception as e:
+            print(f"{Fore.RED}❌ Error on {doc} ({type(e).__name__}): {e}{Style.RESET_ALL}")
+            traceback.print_exc()
+            outcome = ask_choice("[ENTER] skip to the next rebag | 'stop': ", ("", "stop")) or "skip"
+            if list_window in drv.window_handles:
+                drv.switch_to.window(list_window)
+        (done if outcome == "done" else skipped).append(doc)
+        if outcome == "stop":
+            skipped.extend(d for d, *_ in pending[i:])
+            break
+
+    print(f"\n{Fore.CYAN}{Style.BRIGHT}Batch finished: {len(done)} posted, {len(skipped)} not done.{Style.RESET_ALL}")
+    if skipped:
+        print(f"{Fore.YELLOW}⚠️  Not done: {', '.join(skipped)}{Style.RESET_ALL}")
 
 
 def main():
@@ -242,19 +463,20 @@ def main():
     drv = start_session_with_retry(creds)
     if drv is None:
         return
-    print(f"\n{Fore.CYAN}Open a Web A detail page, then press ENTER. 'quit' to exit.{Style.RESET_ALL}")
+    print(f"\n{Fore.CYAN}Open a Web A detail page and press ENTER, or type 'batch' for every "
+          f"unfinished rebag in the Web A list. 'quit' to exit.{Style.RESET_ALL}")
     while True:
-        cmd = input("\n[ENTER] Fill SAPWeb | 'quit' to exit: ").strip().lower()
+        cmd = input("\n[ENTER] Fill SAPWeb | 'batch' | 'quit' to exit: ").strip().lower()
         if cmd == "quit":
             break
-        if cmd != "":
-            print("Invalid input. Press ENTER or type 'quit'.")
+        if cmd not in ("", "batch"):
+            print("Invalid input. Press ENTER, or type 'batch' or 'quit'.")
             continue
         if not driver_alive(drv):
             print(f"{Fore.RED}🔌 Browser connection lost. Restart the script.{Style.RESET_ALL}")
             break
         try:
-            fill_rebag(drv)
+            run_batch(drv) if cmd == "batch" else fill_rebag(drv)
         except Exception as e:
             print(f"{Fore.RED}❌ Error ({type(e).__name__}): {e}{Style.RESET_ALL}")
             traceback.print_exc()
