@@ -28,6 +28,11 @@ Domain terms (Indonesian):
 ## Files
 
 - `rebag_semi_automate_v5.py` — **the current version. All changes go here** unless told otherwise.
+- `rebag_autofill_prototype.py` — **separate auto-fill tool** (works in production, first
+  confirmed 2026-10-14). Reads the open Web A detail page, creates the matching rebag in SAPWeb,
+  then runs the v5 check on it. Keep it a separate file: don't merge it into v5 or wire it into
+  `runner.bat` unless the user asks. It imports login/extraction/compare/log functions from v5,
+  so renaming or changing the signature of those v5 functions breaks it.
 - `rebag_semi_automate_v1..v4.py`, `old_and_working.py` — historical versions, kept for reference.
   Don't edit them, and don't "fix" them to match v5.
 - `runner.bat` — Windows launcher (activates `.venv`, runs v5). Update the filename here if a new version is created.
@@ -101,6 +106,28 @@ Everything depends on these. Whenever one changes, update the code **and this ta
   - JSON payload indices and visual column indices are **not** always the same (see v1.8 in the
     changelog). The remarks fallback in `extract_grid_data` exists for this reason.
 
+**Web B auto-fill** (used by `rebag_autofill_prototype.py`, taken from a Chrome Recorder capture)
+- New blank form: `WEB_MKS/Rebag/Detail` (opened directly, no menu clicks)
+- Header: type `RefNo_I` (Web A doc digits, without `MKUR20`) and `Remarks_I` (Web A remarks
+  as-is), then `btnAdd_CD`
+- Item picker: `btnAddItemIssueDetail` / `btnAddItemReceiptDetail` open
+  `gvCflItemInventoryListRebagIssue` / `...Receipt`. Filter row `<picker>_DXFREditorcol1_I`
+  (item code, then Enter), tick `<picker>_DXSelBtn<n>_D` on the row whose cell equals the code
+  exactly, then `gvCflItemInventoryRebagIssueChoose` / `...ReceiptChoose`. All items of one side
+  are ticked in one picker visit.
+- Save: `btnUpdate_CD`. Qty: click `<grid>_DXDataRow<n> > td` at the Draft qty column, type into
+  `<grid>_DXEditor<qty>_I`, click `Remarks_I` to leave the cell, then `btnUpdate_CD` again.
+- Posting is `btnMenuOther` → Set → Post. **The script never posts**; the operator does.
+- Layout boxes can cover buttons (`ElementClickInterceptedException`), so every click goes
+  through `safe_click` (scroll into view, then fall back to a JS click).
+- Busy wait: `wait_dx_idle` polls until no DevExpress loading panel (`[id$='_LP']`,
+  `.dxlpLoadingPanel`, `.dxgvLoadingPanel`) is visible.
+- Flow: ENTER → read Web A → show the plan → operator types `yes` → fill → v5 check + log +
+  verdict. It refuses to fill if Web A isn't Balanced, a qty is unreadable, a side is empty, or
+  a code appears twice on one side. Susut items are not added (they go in the remarks). Item
+  Keterangan is not typed; it shows a warning instead. It warns loudly if the doc is already in
+  the logs. Keep the `yes` confirmation unless the user asks to remove it.
+
 ## How selectors are discovered (current workflow)
 
 The author has no access to the sites' source. Selectors come from **pasting the rendered
@@ -111,7 +138,14 @@ and reading it. Things to know when you get pasted HTML:
 - Draft and Posted pages are different. Get both before changing column logic.
 - Pasted HTML may contain real business data and session tokens. Don't commit it to the repo
   unless the user asks, and if they do, strip tokens/ViewState first.
-- The plan is to automate this capture later (for example, dumping `page_source` to a file on
+- **Chrome DevTools Recorder** (F12 → ⋮ → More tools → Recorder → Export JSON) is the best way
+  to capture a click path. It records ids/aria/xpath selectors for every step, including
+  popups. The auto-fill was built from one. It records **everything typed, including
+  passwords**: log in before you start recording. Recordings stay out of git
+  (`SAPWEB for CLAUDE.json` is in `.gitignore`; add new recording names there too). When reading one,
+  never repeat typed credentials back.
+- Recordings show clicks, not page structure. For grids and fields, ask for the HTML as well.
+- The plan is to automate HTML capture later (for example, dumping `page_source` to a file on
   each run). Keep that in mind, but don't build it unless asked.
 
 ## Conventions
@@ -120,6 +154,9 @@ and reading it. Things to know when you get pasted HTML:
   change adds a `[vX.Y]` changelog line (the latest is v2.5 inside the v5 file). A big rewrite
   becomes a new `rebag_semi_automate_vN.py` (and `runner.bat` gets updated). Small fixes stay
   in v5.
+- **Ask before building.** When the user describes a big new direction ("fully automate"),
+  propose a plan and wait. Don't implement it in the same turn, and put experiments in a
+  separate file instead of v5.
 - **Style:** plain functions, no classes, no new dependencies without asking. Short
   `drv` for the driver. Console output uses colorama + emoji with a consistent meaning:
   ✓/✗ match/mismatch, ⚠️ warning, ℹ️ info, 🔍 extracting, ❌ error.
