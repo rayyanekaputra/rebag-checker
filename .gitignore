@@ -1,3 +1,6 @@
 creds.json
 /.venv
 /selenium_profile
+*.html
+*_files/
+__pycache__/

@@ -42,6 +42,10 @@
 #        The exception type is printed so we can learn what actually fails.
 # [v2.4] Duplicate detection from the logs: "Re-check #n" for the same doc number, and a loud
 #        "POSSIBLE DOUBLE REBAG" warning when a DIFFERENT doc number has identical content.
+# [v2.5] Web A qty_in / qty_out are parsed separately with parse_qty(); an unreadable qty is
+#        now a FAIL problem instead of the row being silently dropped. Only <tbody> rows are
+#        read, so the Total / Status Balance footer rows can never be taken as items.
+#        Web A's own "Status Balance" badge is read; anything other than "Balanced" is a warning.
 # =============================================================================
 
 import atexit
@@ -371,6 +375,22 @@ def detect_grid_cols(drv, grid_id):
 
 
 # =============================================================================
+# HELPERS: WEB A QTY
+# =============================================================================
+QTY_PATTERN = re.compile(r"^-?\d+(\.\d+)?$")
+
+
+def parse_qty(text):
+    """Web A qty cell -> float. Blank / '-' = 0.0. Anything not a plain number = None."""
+    t = (text or "").strip()
+    if t in ("", "-"):
+        return 0.0
+    if QTY_PATTERN.match(t):
+        return float(t)
+    return None
+
+
+# =============================================================================
 # HELPERS: SUSUT
 # =============================================================================
 def is_susut_item(kode, nama):
@@ -411,20 +431,23 @@ def extract_web_a(drv):
     table = WebDriverWait(drv, 10).until(
         EC.presence_of_element_located((By.CLASS_NAME, "table"))
     )
-    rows = table.find_elements(By.TAG_NAME, "tr")[1:]
+    rows = table.find_elements(By.XPATH, "./tbody/tr")
 
-    baku, jadi = [], []
-    for row in rows:
+    baku, jadi, read_errors = [], [], []
+    for n, row in enumerate(rows, start=1):
         cols = row.find_elements(By.TAG_NAME, "td")
         if len(cols) < 5:
             continue
         kode_item = cols[0].text.strip()
         nama_item = cols[1].text.strip()
-        try:
-            qty_in = float(cols[2].text.strip())
-            qty_out = float(cols[3].text.strip())
-        except ValueError:
-            qty_in = qty_out = 0.0
+        qty_in_text, qty_out_text = cols[2].text.strip(), cols[3].text.strip()
+        qty_in, qty_out = parse_qty(qty_in_text), parse_qty(qty_out_text)
+        if qty_in is None or qty_out is None:
+            msg = (f"Web A row {n} ({kode_item}): unreadable qty "
+                   f"in='{qty_in_text}' out='{qty_out_text}'")
+            read_errors.append(msg)
+            print(f"{Fore.RED}❌ {msg}{Style.RESET_ALL}")
+            continue
         uom = cols[4].text.strip()
 
         rem = ""
@@ -436,7 +459,13 @@ def extract_web_a(drv):
         if qty_in > 0:
             jadi.append((kode_item, nama_item, qty_in, uom, rem))
 
-    return {"doc_number": doc_number, "remarks": remarks, "baku": baku, "jadi": jadi}
+    badges = table.find_elements(By.XPATH, "./tfoot//span[contains(@class, 'badge')]")
+    balance = badges[0].text.strip() if badges else ""
+    if not balance:
+        print(f"{Fore.YELLOW}ℹ️  Web A Status Balance not found on the page.{Style.RESET_ALL}")
+
+    return {"doc_number": doc_number, "remarks": remarks, "baku": baku, "jadi": jadi,
+            "read_errors": read_errors, "balance": balance}
 
 
 def extract_web_b(drv):
@@ -635,14 +664,20 @@ def build_result(a, b):
     baku = compare_section("Bahan Baku", "\n📦 BAHAN BAKU (Qty Out) COMPARISON", a["baku"], b["baku"], remarks_b_str)
     jadi = compare_section("Bahan Jadi", "🎁 BAHAN JADI (Qty In) COMPARISON", a["jadi"], b["jadi"], remarks_b_str)
 
+    problems += a["read_errors"]
     if not a["baku"] and not a["jadi"]:
         problems.append("No items could be extracted from Web A")
     problems += baku["problems"] + jadi["problems"]
 
+    warnings = []
+    balance = a.get("balance", "")
+    if balance and not balance.lower().startswith("balanced"):
+        warnings.append(f"Web A Status Balance: {balance}")
+
     result.update({
         "baku": baku, "jadi": jadi,
         "problems": problems,
-        "warnings": baku["warnings"] + jadi["warnings"],
+        "warnings": warnings + baku["warnings"] + jadi["warnings"],
         "verdict": "PASS" if not problems else "FAIL",
         "fp": compute_fingerprint(a["baku"], a["jadi"], remarks_a_str),
         "has_items": bool(a["baku"] or a["jadi"]),
